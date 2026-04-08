@@ -7,7 +7,7 @@ import BackgroundLayout from "./BackgroundLayout";
 export default function Winners() {
   const [requests, setRequests] = useState([]);
   const [cost, setCost] = useState(0);
-  const { user, logout } = useAuth();
+  const { userEmail, logout } = useAuth();
 
   useEffect(() => {
     loadRequests();
@@ -35,8 +35,7 @@ export default function Winners() {
             Coordinator Dashboard
           </h1>
           <div className="flex items-center gap-4">
-            {/* FIXED: use user?.username instead of attributes.email */}
-            <span className="text-purple-300">Welcome, {user?.username}</span>
+            <span className="text-purple-300">Welcome, {userEmail || "Coordinator"}</span>
             <button onClick={logout} className="bg-red-600/80 px-4 py-2 rounded-xl hover:bg-red-700 transition">
               Logout
             </button>
