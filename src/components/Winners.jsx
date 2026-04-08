@@ -66,11 +66,11 @@ export default function Winners() {
                       {r.status === 'in-progress' && <button onClick={()=>updateStatus(r.id,'fulfilled')} className="bg-green-600 px-2 py-1 rounded text-xs">Fulfill</button>}
                       {r.status === 'fulfilled' && <span className="text-green-400 text-xs">✓</span>}
                     </td>
-                  </tr>
+                   </tr>
                 ))
               )}
             </tbody>
-          </table>
+           </table>
         </div>
       </div>
       <Footer />
