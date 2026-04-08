@@ -7,7 +7,7 @@ import Footer from './Footer';
 import BackgroundLayout from './BackgroundLayout';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,12 +24,12 @@ const Login = () => {
     setError('');
     setLoading(true);
     
-    const result = await login(email, password);
+    // Pass the username (UUID) and password to login
+    const result = await login(username, password);
     
     if (result.success) {
       navigate(from, { replace: true });
     } else if (result.requiresNewPassword) {
-      // Show password reset form
       setIsResetting(true);
       setError('');
     } else {
@@ -63,7 +63,7 @@ const Login = () => {
           <motion.div className="bg-black/60 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-8">
             <h1 className="text-2xl font-bold text-center text-purple-300 mb-4">Set New Password</h1>
             <p className="text-sm text-center text-gray-400 mb-6">
-              User {pendingUserEmail || email} requires a new password.
+              User {pendingUserEmail || username} requires a new password.
             </p>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
@@ -81,7 +81,13 @@ const Login = () => {
                 <label className="block text-purple-300 mb-1">Confirm Password</label>
                 <input
                   type="password"
-                  onChange={(e) => setError(e.target.value !== newPassword ? 'Passwords do not match' : '')}
+                  onChange={(e) => {
+                    if (e.target.value !== newPassword) {
+                      setError('Passwords do not match');
+                    } else {
+                      setError('');
+                    }
+                  }}
                   className="w-full bg-black/50 border border-purple-500/50 rounded-lg p-2"
                   required
                 />
@@ -102,7 +108,7 @@ const Login = () => {
     );
   }
 
-  // Normal login form
+  // Normal login form (username field, no email validation)
   return (
     <div className="min-h-screen text-white">
       <BackgroundLayout />
@@ -114,12 +120,13 @@ const Login = () => {
           </h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-purple-300 mb-1">Email</label>
+              <label className="block text-purple-300 mb-1">Username (UUID)</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-black/50 border border-purple-500/50 rounded-lg p-2"
+                placeholder="Enter your Cognito username (UUID)"
                 required
               />
             </div>
@@ -143,7 +150,7 @@ const Login = () => {
             </button>
           </form>
           <p className="text-xs text-center mt-4 text-purple-300">
-            Use your AWS Cognito credentials
+            Use your Cognito username (UUID) and password
           </p>
         </motion.div>
       </div>
