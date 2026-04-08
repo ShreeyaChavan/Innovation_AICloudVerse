@@ -1,5 +1,4 @@
-// src/components/LoginPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +6,7 @@ import BackgroundLayout from './BackgroundLayout';
 import { Eye, EyeOff, User, Key, ShieldCheck, LogIn } from 'lucide-react';
 
 const LoginPage = () => {
-  const [role, setRole] = useState('user'); // 'user' or 'coordinator'
+  const [role, setRole] = useState('user');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -18,23 +17,36 @@ const LoginPage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isNewPasswordRequired, setIsNewPasswordRequired] = useState(false);
   
-  const { login, completeNewPassword } = useAuth();
+  const { login, completeNewPassword, userEmail } = useAuth();
   const navigate = useNavigate();
 
-  // Handle user login (demo – any credentials work)
+  // Clear form fields on mount and check existing session
+  useEffect(() => {
+    setUsername('');
+    setPassword('');
+    setError('');
+    
+    // If already logged in as coordinator, redirect to winners
+    if (userEmail) {
+      navigate('/winners');
+    }
+    // If demo user is logged in, redirect to home
+    const demoUser = localStorage.getItem('crisisUser');
+    if (demoUser && !userEmail) {
+      navigate('/home');
+    }
+  }, [userEmail, navigate]);
+
   const handleUserLogin = async () => {
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password');
       return false;
     }
-    // Store user info in localStorage for demo purposes
     localStorage.setItem('crisisUser', username);
-    // Dispatch a custom event so other components (like Header) can react
     window.dispatchEvent(new Event('storage'));
     return true;
   };
 
-  // Handle coordinator login via AWS Cognito
   const handleCoordinatorLogin = async () => {
     if (!username.trim() || !password.trim()) {
       setError('Please enter Coordinator ID and password');
@@ -64,7 +76,7 @@ const LoginPage = () => {
       let success = false;
       if (role === 'user') {
         success = await handleUserLogin();
-        if (success) navigate('/home');   // Redirect to main website
+        if (success) navigate('/home');
       } else {
         success = await handleCoordinatorLogin();
         if (success) navigate('/winners');
@@ -101,7 +113,6 @@ const LoginPage = () => {
     }
   };
 
-  // Reset to login form
   const cancelNewPassword = () => {
     setIsNewPasswordRequired(false);
     setNewPassword('');
@@ -109,7 +120,6 @@ const LoginPage = () => {
     setError('');
   };
 
-  // If new password is required, show the password reset form
   if (isNewPasswordRequired) {
     return (
       <div className="min-h-screen text-white">
@@ -139,6 +149,7 @@ const LoginPage = () => {
                     type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="off"
                     className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 pr-10 focus:outline-none focus:border-purple-400 transition"
                     placeholder="Enter new password"
                     required
@@ -162,6 +173,7 @@ const LoginPage = () => {
                   type="password"
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 focus:outline-none focus:border-purple-400 transition"
                   placeholder="Confirm new password"
                   required
@@ -207,7 +219,6 @@ const LoginPage = () => {
     );
   }
 
-  // Main login form
   return (
     <div className="min-h-screen text-white">
       <BackgroundLayout />
@@ -218,7 +229,6 @@ const LoginPage = () => {
           transition={{ duration: 0.5 }}
           className="bg-black/60 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-6 sm:p-8 max-w-md w-full shadow-2xl"
         >
-          {/* Logo / Brand */}
           <div className="text-center mb-8">
             <motion.div
               initial={{ scale: 0.8 }}
@@ -234,7 +244,6 @@ const LoginPage = () => {
             <p className="text-purple-300 text-sm mt-2">Disaster relief coordination platform</p>
           </div>
 
-          {/* Role Toggle */}
           <div className="flex gap-3 mb-8 bg-black/30 p-1 rounded-xl">
             <button
               type="button"
@@ -276,7 +285,6 @@ const LoginPage = () => {
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <AnimatePresence mode="wait">
               <motion.div
@@ -294,6 +302,7 @@ const LoginPage = () => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    autoComplete="off"
                     className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 pl-10 focus:outline-none focus:border-purple-400 transition"
                     placeholder={role === 'user' ? 'Enter your username' : 'Enter your Cognito username/UUID'}
                     required
@@ -312,6 +321,7 @@ const LoginPage = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 pl-10 pr-10 focus:outline-none focus:border-purple-400 transition"
                   placeholder="Enter your password"
                   required
@@ -356,7 +366,6 @@ const LoginPage = () => {
             </button>
           </form>
 
-          {/* Footer info */}
           <div className="mt-6 text-center text-xs text-purple-300/70 space-y-1">
             {role === 'user' ? (
               <p>Demo: Any username/password works • Access the main website</p>
