@@ -1,11 +1,17 @@
-// src/aws-exports.js
 const awsConfig = {
   Auth: {
-    region: 'ap-south-1',           // your Cognito region
-    userPoolId: 'ap-south-1_jj3UR1fJZ',    // from your screenshot
-    userPoolWebClientId: '6mbclsppc44vgo379vkia3115n', // create an app client in Cognito
-    mandatorySignIn: false,
-    authenticationFlowType: 'USER_SRP_AUTH'
+    Cognito: {
+      userPoolId: 'ap-south-1_jj3URifz7',
+      userPoolClientId: '6mbclsppc44vg0379vkia3115n',
+      region: 'ap-south-1',
+      loginWith: {
+        username: true,    // allow username/password login
+        email: false,
+        phone: false
+      },
+      signUpVerificationMethod: 'code',
+      userAttributes: {}
+    }
   }
 };
 
