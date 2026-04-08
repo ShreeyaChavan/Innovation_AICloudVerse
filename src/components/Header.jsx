@@ -14,9 +14,13 @@ const Header = () => {
   const { userEmail, logout } = useAuth();
   const [openNavigation, setOpenNavigation] = useState(false);
 
-  // Check if user is coordinator (has email from Cognito) or just a regular user
   const isCoordinator = !!userEmail;
   const isLoggedIn = isCoordinator || !!localStorage.getItem("crisisUser");
+
+  // Get display name for welcome message
+  const displayName = isCoordinator 
+    ? (userEmail?.split('@')[0] || userEmail) 
+    : localStorage.getItem("crisisUser") || "User";
 
   const toggleNavigation = () => {
     if (openNavigation) {
@@ -39,8 +43,8 @@ const Header = () => {
       await logout();
     } else {
       localStorage.removeItem("crisisUser");
+      navigate('/');
     }
-    navigate('/');
     handleClick();
   };
 
@@ -81,7 +85,7 @@ const Header = () => {
             {isLoggedIn && (
               <div className="lg:hidden flex flex-col gap-4 mt-4 w-full px-6">
                 <div className="text-purple-300 text-center bg-white/5 p-3 rounded-xl">
-                  Welcome, {isCoordinator ? userEmail : localStorage.getItem("crisisUser")}
+                  Welcome, {displayName}
                 </div>
                 <button onClick={handleLogout} className="bg-red-600 px-6 py-2 rounded-full text-white">
                   Logout
@@ -92,19 +96,25 @@ const Header = () => {
           <HamburgerMenu />
         </nav>
 
-        {/* Desktop right section */}
-        <div className="hidden lg:flex items-center gap-4">
+        {/* Desktop right section - single welcome + logout */}
+        <div className="hidden lg:flex items-center gap-3">
           {isLoggedIn ? (
             <>
-              <div className="text-purple-300 text-sm whitespace-nowrap bg-white/5 px-3 py-1.5 rounded-full">
-                Welcome, {isCoordinator ? userEmail?.split('@')[0] : localStorage.getItem("crisisUser")}
+              <div className="text-purple-300 text-sm bg-white/5 px-3 py-1.5 rounded-full max-w-[180px] truncate">
+                👋 Welcome, {displayName}
               </div>
-              <button onClick={handleLogout} className="bg-red-600/80 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-red-700 transition shadow-md whitespace-nowrap">
+              <button 
+                onClick={handleLogout} 
+                className="bg-red-600/80 px-4 py-1.5 rounded-xl text-sm font-bold hover:bg-red-700 transition shadow-md whitespace-nowrap"
+              >
                 Logout
               </button>
             </>
           ) : (
-            <button onClick={() => navigate('/')} className="bg-purple-600/80 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-purple-700 transition">
+            <button 
+              onClick={() => navigate('/')} 
+              className="bg-purple-600/80 px-4 py-1.5 rounded-xl text-sm font-bold hover:bg-purple-700 transition"
+            >
               Login
             </button>
           )}
