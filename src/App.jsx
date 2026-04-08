@@ -8,17 +8,15 @@ import Hero from "./components/Hero";
 import Testimonials from "./components/Testimonials";
 
 const App = () => {
-  // Inject Tawk.to chat script on mount
+  // Inject Insertabot AI chatbot script on mount
   useEffect(() => {
     // Prevent adding duplicate script
-    if (document.getElementById("tawk-script")) return;
+    if (document.querySelector('script[src="https://insertabot.io/widget.js"]')) return;
 
     const script = document.createElement("script");
-    script.id = "tawk-script";
+    script.src = "https://insertabot.io/widget.js";
+    script.setAttribute("data-api-key", "ib_sk_3a4e83c66d42dce0dac26916c1a43d91b2e00087fd36c2c3");
     script.async = true;
-    script.src = "https://embed.tawk.to/69d6cdbdb927021c2d6b6a90/1jlnh9emd";
-    script.charset = "UTF-8";
-    script.setAttribute("crossorigin", "*");
     document.body.appendChild(script);
   }, []);
 
