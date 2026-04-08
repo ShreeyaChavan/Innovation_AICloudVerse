@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
 import { useAuth } from "../context/AuthContext";
 import MenuSvg from "../assets/svg/MenuSvg";
-import { brainwave } from "../assets";
 import { navigation } from "../constants";
 import Button from "./Button";
 import { HamburgerMenu } from "./design/Header";
@@ -17,7 +16,6 @@ const Header = () => {
   const isCoordinator = !!userEmail;
   const isLoggedIn = isCoordinator || !!localStorage.getItem("crisisUser");
 
-  // Get display name for welcome message
   const displayName = isCoordinator 
     ? (userEmail?.split('@')[0] || userEmail) 
     : localStorage.getItem("crisisUser") || "User";
@@ -48,7 +46,6 @@ const Header = () => {
     handleClick();
   };
 
-  // Build navigation items including Winners only for coordinators
   const navItems = [...navigation];
   if (isCoordinator) {
     navItems.push({
@@ -61,9 +58,7 @@ const Header = () => {
   return (
     <div className={`fixed top-0 left-0 w-full z-50 bg-transparent ${openNavigation ? "bg-n-8" : "bg-transparent"}`}>
       <div className="flex px-5 lg:px-7.5 xl:px-10 max-lg:py-4 items-center justify-between w-full">
-        <a className="block w-[12rem] xl:mr-8 flex-shrink-0" href="/home">
-          <img className="rounded-full mt-2 mx-auto lg:my-5 h-[50px] w-[50px]" src={brainwave} width={80} height={80} alt="AICVS" />
-        </a>
+        {/* Logo removed */}
 
         <nav className={`${openNavigation ? "flex" : "hidden"} fixed top-[5rem] left-0 right-0 bottom-0 bg-n-8 lg:static lg:flex lg:flex-1 lg:justify-center lg:bg-transparent`}>
           <div className="relative z-2 flex flex-col items-center justify-center gap-8 lg:flex-row">
@@ -81,7 +76,6 @@ const Header = () => {
                 {item.title}
               </a>
             ))}
-            {/* Mobile menu extra content */}
             {isLoggedIn && (
               <div className="lg:hidden flex flex-col gap-4 mt-4 w-full px-6">
                 <div className="text-purple-300 text-center bg-white/5 p-3 rounded-xl">
@@ -96,12 +90,11 @@ const Header = () => {
           <HamburgerMenu />
         </nav>
 
-        {/* Desktop right section - single welcome + logout */}
         <div className="hidden lg:flex items-center gap-3">
           {isLoggedIn ? (
             <>
               <div className="text-purple-300 text-sm bg-white/5 px-3 py-1.5 rounded-full max-w-[180px] truncate">
-                👋 Welcome, {displayName}
+                Welcome, {displayName}
               </div>
               <button 
                 onClick={handleLogout} 
