@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getCurrentUser, signIn, signOut, confirmSignIn } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, signOut, confirmSignIn, fetchUserAttributes } from 'aws-amplify/auth';
 
 const AuthContext = createContext();
 
@@ -7,6 +7,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pendingUserEmail, setPendingUserEmail] = useState(null);
 
@@ -18,28 +19,30 @@ export const AuthProvider = ({ children }) => {
     try {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
+      const attributes = await fetchUserAttributes();
+      setUserEmail(attributes.email);
     } catch (err) {
       setUser(null);
+      setUserEmail(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     try {
-      const signInResult = await signIn({ username: email, password });
+      const signInResult = await signIn({ username, password });
       
-      // If user is signed in immediately
       if (signInResult.isSignedIn) {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        const attributes = await fetchUserAttributes();
+        setUserEmail(attributes.email);
         return { success: true };
       }
       
-      // Check if password reset is required
       if (signInResult.nextStep?.signInStep === 'NEW_PASSWORD_REQUIRED') {
-        // Store the user email and return special status
-        setPendingUserEmail(email);
+        setPendingUserEmail(username);
         return { 
           success: false, 
           requiresNewPassword: true,
@@ -60,6 +63,8 @@ export const AuthProvider = ({ children }) => {
       if (result.isSignedIn) {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        const attributes = await fetchUserAttributes();
+        setUserEmail(attributes.email);
         setPendingUserEmail(null);
         return { success: true };
       }
@@ -72,11 +77,12 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await signOut();
     setUser(null);
+    setUserEmail(null);
   };
 
   return (
     <AuthContext.Provider value={{ 
-      user, loading, login, logout,
+      user, userEmail, loading, login, logout,
       pendingUserEmail, completeNewPassword
     }}>
       {children}
