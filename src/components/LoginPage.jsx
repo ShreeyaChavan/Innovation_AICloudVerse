@@ -1,124 +1,370 @@
+// src/components/LoginPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import BackgroundLayout from './BackgroundLayout';
+import { Eye, EyeOff, User, Key, ShieldCheck, LogIn } from 'lucide-react';
 
 const LoginPage = () => {
   const [role, setRole] = useState('user'); // 'user' or 'coordinator'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isNewPasswordRequired, setIsNewPasswordRequired] = useState(false);
+  
+  const { login, completeNewPassword } = useAuth();
   const navigate = useNavigate();
+
+  // Handle user login (demo)
+  const handleUserLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter both username and password');
+      return false;
+    }
+    // Demo login – store in localStorage and simulate success
+    localStorage.setItem('crisisUser', username);
+    // Optional: trigger a custom event for other components
+    window.dispatchEvent(new Event('storage'));
+    return true;
+  };
+
+  // Handle coordinator login via Cognito
+  const handleCoordinatorLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter Coordinator ID and password');
+      return false;
+    }
+    
+    const result = await login(username, password);
+    
+    if (result.success) {
+      return true;
+    } else if (result.requiresNewPassword) {
+      setIsNewPasswordRequired(true);
+      setError('');
+      return false;
+    } else {
+      setError(result.message || 'Login failed. Check your credentials.');
+      return false;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    if (role === 'user') {
-      // Simple demo login – any non‑empty credentials work
-      if (username.trim() && password.trim()) {
-        localStorage.setItem('crisisUser', username);
-        navigate('/app');
+    try {
+      let success = false;
+      if (role === 'user') {
+        success = await handleUserLogin();
+        if (success) navigate('/app');
       } else {
-        setError('Please enter username and password');
+        success = await handleCoordinatorLogin();
+        if (success) navigate('/winners');
       }
-      setLoading(false);
-    } else {
-      // Coordinator login – use Cognito
-      const result = await login(username, password);
-      if (result.success) {
-        navigate('/winners');
-      } else {
-        setError(result.message || 'Login failed');
-      }
+    } catch (err) {
+      setError(err.message || 'An unexpected error occurred');
+    } finally {
       setLoading(false);
     }
   };
 
+  const handleNewPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (newPassword !== confirmNewPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    
+    setLoading(true);
+    const result = await completeNewPassword(newPassword);
+    setLoading(false);
+    
+    if (result.success) {
+      navigate('/winners');
+    } else {
+      setError(result.message || 'Failed to set new password');
+    }
+  };
+
+  // Reset to login form
+  const cancelNewPassword = () => {
+    setIsNewPasswordRequired(false);
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setError('');
+  };
+
+  // If new password is required, show the password reset form
+  if (isNewPasswordRequired) {
+    return (
+      <div className="min-h-screen text-white">
+        <BackgroundLayout />
+        <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black/60 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-8 max-w-md w-full shadow-2xl"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                Set New Password
+              </h2>
+              <p className="text-purple-300 text-sm mt-2">
+                Account requires a password change
+              </p>
+            </div>
+
+            <form onSubmit={handleNewPasswordSubmit} className="space-y-5">
+              <div>
+                <label className="block text-purple-300 text-sm font-medium mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 pr-10 focus:outline-none focus:border-purple-400 transition"
+                    placeholder="Enter new password"
+                    required
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-300"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-purple-300 text-sm font-medium mb-2">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 focus:outline-none focus:border-purple-400 transition"
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-red-400 text-sm bg-red-950/30 p-2 rounded-lg"
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 py-3 rounded-xl font-bold text-white transition hover:scale-105 disabled:opacity-70"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Updating...</span>
+                  </div>
+                ) : (
+                  'Set Password & Login'
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={cancelNewPassword}
+                className="w-full text-purple-400 text-sm hover:text-purple-300 transition"
+              >
+                ← Back to login
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main login form
   return (
     <div className="min-h-screen text-white">
       <BackgroundLayout />
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-black/60 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-8 max-w-md w-full"
+          transition={{ duration: 0.5 }}
+          className="bg-black/60 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-6 sm:p-8 max-w-md w-full shadow-2xl"
         >
-          <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-8">
-            CrisisConnect
-          </h1>
+          {/* Logo / Brand */}
+          <div className="text-center mb-8">
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-block p-3 rounded-full bg-gradient-to-r from-purple-600/20 to-cyan-600/20 mb-4"
+            >
+              <ShieldCheck className="w-10 h-10 text-purple-400" />
+            </motion.div>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              CrisisConnect
+            </h1>
+            <p className="text-purple-300 text-sm mt-2">Disaster relief coordination platform</p>
+          </div>
 
           {/* Role Toggle */}
-          <div className="flex gap-4 mb-8">
+          <div className="flex gap-3 mb-8 bg-black/30 p-1 rounded-xl">
             <button
               type="button"
-              onClick={() => setRole('user')}
-              className={`flex-1 py-2 rounded-xl font-semibold transition ${
+              onClick={() => {
+                setRole('user');
+                setError('');
+                setUsername('');
+                setPassword('');
+              }}
+              className={`flex-1 py-2.5 rounded-lg font-semibold transition-all duration-200 ${
                 role === 'user'
-                  ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg'
+                  : 'bg-white/5 text-gray-300 hover:bg-white/10'
               }`}
             >
-              User
+              <div className="flex items-center justify-center gap-2">
+                <User size={18} />
+                <span>User</span>
+              </div>
             </button>
             <button
               type="button"
-              onClick={() => setRole('coordinator')}
-              className={`flex-1 py-2 rounded-xl font-semibold transition ${
+              onClick={() => {
+                setRole('coordinator');
+                setError('');
+                setUsername('');
+                setPassword('');
+              }}
+              className={`flex-1 py-2.5 rounded-lg font-semibold transition-all duration-200 ${
                 role === 'coordinator'
-                  ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg'
+                  : 'bg-white/5 text-gray-300 hover:bg-white/10'
               }`}
             >
-              Coordinator
+              <div className="flex items-center justify-center gap-2">
+                <ShieldCheck size={18} />
+                <span>Coordinator</span>
+              </div>
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={role}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="block text-purple-300 text-sm font-medium mb-2">
+                  {role === 'user' ? 'Username' : 'Coordinator ID (UUID)'}
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 pl-10 focus:outline-none focus:border-purple-400 transition"
+                    placeholder={role === 'user' ? 'Enter your username' : 'Enter your Cognito username/UUID'}
+                    required
+                  />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" size={18} />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
             <div>
-              <label className="block text-purple-300 mb-1">
-                {role === 'user' ? 'Username' : 'Coordinator ID (UUID/Email)'}
+              <label className="block text-purple-300 text-sm font-medium mb-2">
+                Password
               </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black/50 border border-purple-500/50 rounded-lg p-2"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-black/50 border border-purple-500/50 rounded-xl p-3 pl-10 pr-10 focus:outline-none focus:border-purple-400 transition"
+                  placeholder="Enter your password"
+                  required
+                />
+                <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" size={18} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-purple-300 mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black/50 border border-purple-500/50 rounded-lg p-2"
-                required
-              />
-            </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-sm bg-red-950/30 p-2 rounded-lg"
+              >
+                {error}
+              </motion.p>
+            )}
+
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-xl font-bold transition hover:scale-105 ${
-                role === 'user'
-                  ? 'bg-gradient-to-r from-green-600 to-teal-600'
-                  : 'bg-gradient-to-r from-purple-600 to-cyan-600'
-              }`}
+              className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 py-3 rounded-xl font-bold text-white transition hover:scale-105 disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Authenticating...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={18} />
+                  <span>Login</span>
+                </>
+              )}
             </button>
           </form>
-          <p className="text-xs text-center mt-4 text-purple-300">
-            {role === 'user'
-              ? 'Demo: any username/password works'
-              : 'Use your AWS Cognito credentials'}
-          </p>
+
+          {/* Footer info */}
+          <div className="mt-6 text-center text-xs text-purple-300/70 space-y-1">
+            {role === 'user' ? (
+              <p>Demo: Any username/password works • Access user dashboard</p>
+            ) : (
+              <p>Use your AWS Cognito credentials • Secure access for coordinators</p>
+            )}
+            <p className="text-purple-400/50">© 2025 CrisisConnect • Disaster Response Platform</p>
+          </div>
         </motion.div>
       </div>
     </div>
