@@ -9,7 +9,7 @@ import "./index.css";
 
 // Components
 import LoginPage from "./components/LoginPage";
-import MainApp from "./components/MainApp";
+import App from "./App";          // <-- import the main website
 import ProtectedRoute from "./components/ProtectedRoute";
 import Winners from "./components/Winners";
 import Team from "./components/Team";
@@ -19,7 +19,6 @@ import Register from "./components/Register";
 import Events from "./components/Events";
 import Blog from "./components/Blog";
 
-// Configure Amplify (for coordinator login)
 Amplify.configure(awsConfig);
 
 const router = createBrowserRouter([
@@ -28,8 +27,8 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: "/app",
-    element: <MainApp />,
+    path: "/home",               // <-- new route for the main website
+    element: <App />,
   },
   {
     path: "/winners",
@@ -39,7 +38,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  // Public routes (accessible without login)
+  // Public routes
   {
     path: "/team",
     element: (
