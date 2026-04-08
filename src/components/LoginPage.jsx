@@ -21,20 +21,20 @@ const LoginPage = () => {
   const { login, completeNewPassword } = useAuth();
   const navigate = useNavigate();
 
-  // Handle user login (demo)
+  // Handle user login (demo – any credentials work)
   const handleUserLogin = async () => {
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password');
       return false;
     }
-    // Demo login – store in localStorage and simulate success
+    // Store user info in localStorage for demo purposes
     localStorage.setItem('crisisUser', username);
-    // Optional: trigger a custom event for other components
+    // Dispatch a custom event so other components (like Header) can react
     window.dispatchEvent(new Event('storage'));
     return true;
   };
 
-  // Handle coordinator login via Cognito
+  // Handle coordinator login via AWS Cognito
   const handleCoordinatorLogin = async () => {
     if (!username.trim() || !password.trim()) {
       setError('Please enter Coordinator ID and password');
@@ -64,7 +64,7 @@ const LoginPage = () => {
       let success = false;
       if (role === 'user') {
         success = await handleUserLogin();
-        if (success) navigate('/app');
+        if (success) navigate('/home');   // Redirect to main website
       } else {
         success = await handleCoordinatorLogin();
         if (success) navigate('/winners');
@@ -359,7 +359,7 @@ const LoginPage = () => {
           {/* Footer info */}
           <div className="mt-6 text-center text-xs text-purple-300/70 space-y-1">
             {role === 'user' ? (
-              <p>Demo: Any username/password works • Access user dashboard</p>
+              <p>Demo: Any username/password works • Access the main website</p>
             ) : (
               <p>Use your AWS Cognito credentials • Secure access for coordinators</p>
             )}
