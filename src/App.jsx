@@ -20,7 +20,7 @@ const Hero = () => {
     e.preventDefault();
     
     // REPLACE THIS URL WITH YOUR ACTUAL API GATEWAY URL
-    const apiUrl = "https://YOUR_API_ID.execute-api.YOUR_REGION.amazonaws.com/submit-request";
+    const apiUrl = "https://kb7fbyi1c6.execute-api.ap-south-1.amazonaws.com/prod"
     
     setIsSubmitting(true);
     
