@@ -7,7 +7,7 @@ import BackgroundLayout from "./BackgroundLayout";
 export default function Winners() {
   const [requests, setRequests] = useState([]);
   const [cost, setCost] = useState(0);
-  const { userEmail, logout } = useAuth();
+  const { userEmail } = useAuth();
 
   useEffect(() => {
     loadRequests();
@@ -32,14 +32,9 @@ export default function Winners() {
       <div className="relative z-10 pt-32 pb-20 px-4 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6 flex-wrap">
           <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Coordinator Dashboard
+            Crisis Response Dashboard
           </h1>
-          <div className="flex items-center gap-4">
-            <span className="text-purple-300">Welcome, {userEmail || "Coordinator"}</span>
-            <button onClick={logout} className="bg-red-600/80 px-4 py-2 rounded-xl hover:bg-red-700 transition">
-              Logout
-            </button>
-          </div>
+          {/* Removed duplicate welcome and logout button - header already handles it */}
         </div>
         <div className="bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-xl p-4 mb-8 flex justify-between">
           <span className="text-purple-300">Estimated Monthly AWS Cost</span>
@@ -48,11 +43,20 @@ export default function Winners() {
         <div className="bg-black/40 backdrop-blur-md rounded-2xl overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-purple-900/30 border-b border-purple-500/30">
-              <tr><th className="p-3">Type</th><th>Location</th><th>Severity</th><th>Status</th><th>Time</th><th>Action</th></tr>
+              <tr>
+                <th className="p-3">Type</th>
+                <th>Location</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody>
               {requests.length === 0 ? (
-                <tr><td colSpan="6" className="text-center p-8">No requests</td></tr>
+                <tr>
+                  <td colSpan="6" className="text-center p-8">No requests</td>
+                </tr>
               ) : (
                 requests.map(r => (
                   <tr key={r.id} className="border-b border-purple-500/20">
