@@ -37,9 +37,7 @@ const Hero = () => {
           <button onClick={() => navigate('/register')} className="bg-gradient-to-r from-purple-600 to-cyan-600 px-8 py-3 rounded-full font-bold text-lg shadow-lg hover:scale-105 transition">
             Request Help
           </button>
-          <button onClick={() => navigate('/winners')} className="border-2 border-purple-400 px-8 py-3 rounded-full font-bold text-lg hover:bg-purple-600/30 transition">
-            Coordinator Login
-          </button>
+         
         </motion.div>
 
         {/* Live stats */}
