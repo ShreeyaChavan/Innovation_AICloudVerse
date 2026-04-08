@@ -1,15 +1,18 @@
+// src/components/Header.jsx
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
+import { useAuth } from "../context/AuthContext";
 import MenuSvg from "../assets/svg/MenuSvg";
 import { brainwave } from "../assets";
-import { logo } from "../assets";
 import { navigation } from "../constants";
 import Button from "./Button";
 import { HamburgerMenu } from "./design/Header";
 
 const Header = () => {
   const pathname = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [openNavigation, setOpenNavigation] = useState(false);
 
   const toggleNavigation = () => {
@@ -28,57 +31,64 @@ const Header = () => {
     setOpenNavigation(false);
   };
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+    handleClick();
+  };
+
   return (
-    // In Header.jsx, change the main div className to:
-<div
-  className={`fixed top-0 left-0 w-full z-50 bg-transparent ${
-    openNavigation ? "bg-n-8" : "bg-transparent"
-  }`}
->
-    <div className="flex px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
-      <a className="block w-[12rem] xl:mr-8" href="#hero">
-        <img className="rounded-full mt-2 mx-auto lg:my-5 h-[50px] w-[50px]" src={brainwave} width={80} height={80} alt="AICVS" />
-      </a>
+    <div className={`fixed top-0 left-0 w-full z-50 bg-transparent ${openNavigation ? "bg-n-8" : "bg-transparent"}`}>
+      <div className="flex px-5 lg:px-7.5 xl:px-10 max-lg:py-4 items-center justify-between">
+        <a className="block w-[12rem] xl:mr-8" href="#hero">
+          <img className="rounded-full mt-2 mx-auto lg:my-5 h-[50px] w-[50px]" src={brainwave} width={80} height={80} alt="AICVS" />
+        </a>
 
-      <nav
-  className={`${
-    openNavigation ? "flex" : "hidden"
-  } fixed top-[5rem] left-0 right-0 bottom-0 bg-n-8
-  lg:static lg:flex lg:flex-1 lg:justify-center lg:bg-transparent`}
->
+        <nav className={`${openNavigation ? "flex" : "hidden"} fixed top-[5rem] left-0 right-0 bottom-0 bg-n-8 lg:static lg:flex lg:flex-1 lg:justify-center lg:bg-transparent`}>
+          <div className="relative z-2 flex flex-col items-center justify-center gap-8 lg:flex-row">
+            {navigation.map((item) => (
+              <a
+                key={item.id}
+                href={item.url}
+                onClick={handleClick}
+                className={`block relative font-code text-2xl uppercase text-n-1 transition-colors hover:text-color-1 ${
+                  item.onlyMobile ? "lg:hidden" : ""
+                } px-6 py-6 md:py-8 lg:-mr-0.25 lg:text-xl lg:font-semibold ${
+                  item.url === pathname.hash ? "z-2 lg:text-n-1" : "lg:text-n-1/50"
+                } lg:leading-5 lg:hover:text-n-1 xl:px-12`}
+              >
+                {item.title}
+              </a>
+            ))}
+            {/* Auth buttons in mobile menu */}
+            <div className="lg:hidden flex flex-col gap-4 mt-4">
+              {user ? (
+                <button onClick={handleLogout} className="bg-red-600 px-6 py-2 rounded-full text-white">Logout</button>
+              ) : (
+                <button onClick={() => { navigate('/login'); handleClick(); }} className="bg-purple-600 px-6 py-2 rounded-full text-white">Login</button>
+              )}
+            </div>
+          </div>
+          <HamburgerMenu />
+        </nav>
 
-        <div className="relative z-2 flex flex-col items-center justify-center gap-8
- lg:flex-row">
-
-          {navigation.map((item) => (
-            <a
-              key={item.id}
-              href={item.url}
-              onClick={handleClick}
-              className={`block relative font-code text-2xl uppercase text-n-1 transition-colors hover:text-color-1 ${
-                item.onlyMobile ? "lg:hidden" : ""
-              } px-6 py-6 md:py-8 lg:-mr-0.25 lg:text-xl lg:font-semibold ${
-                item.url === pathname.hash
-                  ? "z-2 lg:text-n-1"
-                  : "lg:text-n-1/50"
-              } lg:leading-5 lg:hover:text-n-1 xl:px-12`}
-            >
-              {item.title}
-            </a>
-          ))}
+        {/* Desktop auth buttons */}
+        <div className="hidden lg:flex items-center gap-4">
+          {user ? (
+            <>
+              <span className="text-purple-300 text-sm">{user?.attributes?.email?.split('@')[0]}</span>
+              <button onClick={handleLogout} className="bg-red-600/80 px-4 py-2 rounded-xl text-sm hover:bg-red-700 transition">Logout</button>
+            </>
+          ) : (
+            <button onClick={() => navigate('/login')} className="bg-gradient-to-r from-purple-600 to-cyan-600 px-4 py-2 rounded-xl text-sm font-bold hover:scale-105 transition">Coordinator Login</button>
+          )}
         </div>
 
-        <HamburgerMenu />
-      </nav>
-
-      <Button
-        className="ml-auto lg:hidden"
-        onClick={toggleNavigation}
-      >
-        <MenuSvg openNavigation={openNavigation} />
-      </Button>
+        <Button className="ml-auto lg:hidden" onClick={toggleNavigation}>
+          <MenuSvg openNavigation={openNavigation} />
+        </Button>
+      </div>
     </div>
-  </div>
   );
 };
 
