@@ -70,14 +70,22 @@ const Header = () => {
           <HamburgerMenu />
         </nav>
 
+        {/* Desktop auth buttons - IMPROVED VISIBILITY */}
         <div className="hidden lg:flex items-center gap-4">
           {user ? (
             <>
-              <span className="text-purple-300 text-sm">{user?.attributes?.email?.split('@')[0]}</span>
-              <button onClick={handleLogout} className="bg-red-600/80 px-4 py-2 rounded-xl text-sm hover:bg-red-700 transition">Logout</button>
+              <span className="text-purple-300 text-sm whitespace-nowrap">Welcome, {user?.username}</span>
+              <button onClick={handleLogout} className="bg-red-600/80 px-5 py-2 rounded-xl text-sm font-bold hover:bg-red-700 transition whitespace-nowrap">
+                Logout
+              </button>
             </>
           ) : (
-            <button onClick={() => navigate('/login')} className="bg-gradient-to-r from-purple-600 to-cyan-600 px-4 py-2 rounded-xl text-sm font-bold hover:scale-105 transition">Coordinator Login</button>
+            <button 
+              onClick={() => navigate('/login')} 
+              className="bg-gradient-to-r from-purple-600 to-cyan-600 px-6 py-2 rounded-xl text-sm font-bold hover:scale-105 transition shadow-lg whitespace-nowrap"
+            >
+              Coordinator Login
+            </button>
           )}
         </div>
 
