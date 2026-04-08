@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getCurrentUser, signIn, signOut, confirmSignIn, fetchUserAttributes, clearCredentials } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, signOut, confirmSignIn, fetchUserAttributes } from 'aws-amplify/auth';
 
 const AuthContext = createContext();
 
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
         setUser(currentUser);
         const attributes = await fetchUserAttributes();
         setUserEmail(attributes.email);
-        setPendingUserEmail(null); // clear pending email
+        setPendingUserEmail(null);
         return { success: true };
       }
       return { success: false, message: 'Failed to set new password' };
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Helper to clear all Amplify storage
+  // Helper to clear all Amplify storage (IndexedDB, localStorage, sessionStorage)
   const clearAmplifyStorage = () => {
     // Clear localStorage keys used by Amplify
     const amplifyKeys = [
@@ -89,16 +89,16 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.removeItem(key);
     });
     // Attempt to clear IndexedDB (optional, but safe)
-    indexedDB.deleteDatabase('amplify-datastore');
-    indexedDB.deleteDatabase('aws-amplify-auth');
+    try {
+      indexedDB.deleteDatabase('amplify-datastore');
+      indexedDB.deleteDatabase('aws-amplify-auth');
+    } catch(e) { console.warn(e); }
   };
 
   const logout = async () => {
     try {
       // Global sign out invalidates tokens across devices
       await signOut({ global: true });
-      // Clear Amplify's local storage and credentials
-      await clearCredentials();
       clearAmplifyStorage();
     } catch (error) {
       console.error('Logout error:', error);
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     // Clear demo user storage
     localStorage.removeItem('crisisUser');
     sessionStorage.clear();
-    // Optional: hard redirect to login page to reset everything
+    // Force a full page reload to reset everything
     window.location.href = '/';
   };
 
