@@ -5,26 +5,41 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Amplify } from 'aws-amplify';
 import awsConfig from './aws-exports';
 import { AuthProvider } from './context/AuthContext';
-import App from "./App.jsx";
 import "./index.css";
-import Team from "./components/Team.jsx";
-import Header from "./components/Header.jsx";
-import Footer from "./components/Footer.jsx";
-import Register from "./components/Register.jsx";
-import Events from "./components/Events.jsx";
-import Blog from "./components/Blog.jsx";
-import Winners from "./components/Winners.jsx";
-import Login from "./components/Login.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
-// Configure Amplify
+// Components
+import LoginPage from "./components/LoginPage";
+import MainApp from "./components/MainApp";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Winners from "./components/Winners";
+import Team from "./components/Team";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Register from "./components/Register";
+import Events from "./components/Events";
+import Blog from "./components/Blog";
+
+// Configure Amplify (for coordinator login)
 Amplify.configure(awsConfig);
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <LoginPage />,
   },
+  {
+    path: "/app",
+    element: <MainApp />,
+  },
+  {
+    path: "/winners",
+    element: (
+      <ProtectedRoute>
+        <Winners />
+      </ProtectedRoute>
+    ),
+  },
+  // Public routes (accessible without login)
   {
     path: "/team",
     element: (
@@ -46,18 +61,6 @@ const router = createBrowserRouter([
   {
     path: "/blogs",
     element: <Blog />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/winners",
-    element: (
-      <ProtectedRoute>
-        <Winners />
-      </ProtectedRoute>
-    ),
   },
 ]);
 
