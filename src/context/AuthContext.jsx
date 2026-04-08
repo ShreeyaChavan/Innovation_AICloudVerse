@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Auth } from 'aws-amplify';
+import { getCurrentUser, signIn, signOut } from 'aws-amplify/auth';
 
 const AuthContext = createContext();
 
@@ -15,8 +15,8 @@ export const AuthProvider = ({ children }) => {
 
   const checkUser = async () => {
     try {
-      const cognitoUser = await Auth.currentAuthenticatedUser();
-      setUser(cognitoUser);
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
     } catch (err) {
       setUser(null);
     } finally {
@@ -26,16 +26,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const cognitoUser = await Auth.signIn(email, password);
-      setUser(cognitoUser);
-      return { success: true };
+      const { isSignedIn, nextStep } = await signIn({ username: email, password });
+      if (isSignedIn) {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        return { success: true };
+      }
+      return { success: false, message: 'Sign in incomplete' };
     } catch (error) {
       return { success: false, message: error.message };
     }
   };
 
   const logout = async () => {
-    await Auth.signOut();
+    await signOut();
     setUser(null);
   };
 
