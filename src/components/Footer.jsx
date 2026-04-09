@@ -1,73 +1,38 @@
+// src/components/Footer.jsx (updated with Anudaan)
 import React from "react";
 import { socials } from "../constants";
-import Section from "./Section";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <Section 
-      crosses className="!px-0 !py-10 mb-2">
-
-<div className="container flex sm:justify-between justify-center items-center gap-10 max-sm:flex-col">
-        <div className="flex flex-col text-center md:font-semibold sm:text-left">
-          <p className="caption md:text-3xl text-n-4 lg:block">
-            © {new Date().getFullYear()}. All rights reserved.
-          </p>
-          <p className="text-sm md:text-2xl md:font-semibold text-n-4 mt-2">
-            Artificial Intelligence and Computer Vision Society (AICVS), 
-            <br />Cummins College of Engineering for Women, Karvenagar, Pune.
-          </p>
-          <p className="text-base md:text-lg">
-                <a href="mailto:aicvs.cummins@cumminscollege.in" className="underline text-n-4"> aicvs.cummins@cumminscollege.in</a>
-              </p>
-        </div>
-
-        <ul className="flex gap-5 flex-wrap">
-          {socials.map((item) => (
-            <a
-              key={item.id}
-              href={item.url}
-              target="_blank"
-              className="flex items-center justify-center w-20 h-20 bg-n-7 rounded-full transition-colors hover:bg-n-6"
-              rel="noopener noreferrer"
-            >
-              <img src={item.iconUrl} width={80} height={80} alt={item.title} />
-            </a>
-          ))}
-        </ul>
-      </div>
-
-      {/* Contact Information Section */}
-      <section className="py-10 px-5 relative z-10">
-        <div className="container mx-auto">
-          {/* Contact Information - Left aligned */}
-          <div className="grid gap-5 sm:grid-cols-1 md:grid-cols-1 text-n-4">
-            <div>
-              <h3 className="text-xl md:text-3xl font-semibold mb-2">Contact Information</h3>
-              <p className="text-base md:text-lg">
-                <strong>Email:</strong> 
-                <a href="mailto:principal@cumminscollege.in" className="underline text-n-4"> principal@cumminscollege.in</a>
-              </p>
-              <p className="text-base md:text-lg">
-                <strong>College Contact No:</strong> 
-                <a href="tel:+912025311000" className="underline text-n-4"> 020-25311000</a>, 
-                <a href="tel:+912025477211" className="underline text-n-4"> 25477211</a>
-              </p>
-              <p className="text-base md:text-lg">
-                <strong>Fax No:</strong> 25311499
-              </p>
-              <p className="text-base md:text-lg">
-                <strong>College Email:</strong> 
-                <a href="mailto:administrator@cumminscollege.in" className="underline text-n-4"> administrator@cumminscollege.in</a>
-              </p>
-            </div>
+    <footer className="relative z-10 border-t border-white/10 bg-black/30 backdrop-blur-sm py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-center md:text-left">
+            <span className="text-lg font-bold bg-gradient-to-r from-red-400 to-blue-400 bg-clip-text text-transparent">Anudaan</span>
+            <p className="text-gray-500 text-sm mt-1">Giving the gift of life</p>
+          </div>
+          <div className="flex gap-6">
+            {socials.map((social) => (
+              <a
+                key={social.id}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-red-400 transition"
+              >
+                <img src={social.iconUrl} alt={social.title} className="w-5 h-5 opacity-70 hover:opacity-100" />
+              </a>
+            ))}
+          </div>
+          <div className="text-gray-500 text-xs">
+            © {currentYear} Anudaan. All rights reserved.
           </div>
         </div>
-      </section>
-      
-    </Section>
+      </div>
+    </footer>
   );
 };
 
 export default Footer;
-
-
