@@ -1,93 +1,130 @@
-// src/components/Blog.jsx
-import React from "react";
-import { motion } from "framer-motion";
+// src/components/Blog.jsx - Recipient Request Form
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import BackgroundLayout from "./BackgroundLayout";
 
-const stories = [
-  {
-    title: "Rescue operation saves 47 stranded families",
-    date: "April 7, 2026",
-    summary: "Using real-time request mapping, our team coordinated boats and food supplies to Karvenagar within 2 hours.",
-    icon: "🚤",
-    link: "#",
-  },
-  {
-    title: "Medical camp reaches remote village",
-    date: "April 5, 2026",
-    summary: "A medical team was dispatched to Hinjewadi after 12 high‑severity medical requests were received through CrisisConnect.",
-    icon: "🏥",
-    link: "#",
-  },
-  {
-    title: "How to stay safe during a flood",
-    date: "Safety Guide",
-    summary: "Avoid floodwaters, keep emergency numbers handy, and use CrisisConnect to request help immediately.",
-    icon: "📢",
-    link: "#",
-  },
-  {
-    title: "Volunteer coordination success",
-    date: "April 3, 2026",
-    summary: "Over 200 volunteers registered via CrisisConnect to assist in rescue and relief efforts across Pune.",
-    icon: "🤝",
-    link: "#",
-  },
-];
-
 const Blog = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    requiredOrgan: "",
+    bloodGroup: "",
+    age: "",
+    weight: "",
+    medicalCondition: "",
+    urgency: "Medium",
+    waitingTime: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const receivers = JSON.parse(localStorage.getItem("organReceivers") || "[]");
+    const newReceiver = {
+      id: Date.now(),
+      ...formData,
+      timestamp: new Date().toISOString(),
+      status: "waiting",
+    };
+    receivers.push(newReceiver);
+    localStorage.setItem("organReceivers", JSON.stringify(receivers));
+    setSubmitted(true);
+    setTimeout(() => {
+      navigate("/home");
+    }, 2000);
+  };
+
   return (
     <>
-      {/* Background */}
       <div className="fixed inset-0 -z-10">
         <BackgroundLayout />
       </div>
-
-      {/* Header - now visible */}
       <Header />
-
-      {/* Main Content */}
-      <div className="relative z-10 pt-32 pb-20 px-4 max-w-6xl mx-auto">
-        <h1 className="text-4xl md:text-6xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
-          Success Stories & Safety
+      <div className="relative z-10 pt-32 pb-20 px-4 max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
+          Request an Organ
         </h1>
-        <p className="text-center text-purple-200 mb-12">
-          Real impact from the field and essential guidelines.
+        <p className="text-center text-purple-200 mb-8">
+          Fill this form to be added to the waiting list. We'll match you with a compatible donor.
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stories.map((story, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-black/40 backdrop-blur-md rounded-2xl border border-purple-500/30 p-6 hover:scale-[1.02] transition-all"
-            >
-              <div className="text-5xl mb-3">{story.icon}</div>
-              <h3 className="text-xl font-bold text-white">{story.title}</h3>
-              <p className="text-purple-300 text-sm mt-1">{story.date}</p>
-              <p className="text-gray-300 mt-3">{story.summary}</p>
-              <a href={story.link} className="inline-block mt-4 text-cyan-400 text-sm hover:underline">
-                Read more →
-              </a>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Emergency Helplines Banner */}
-        <div className="mt-12 bg-purple-900/30 border border-purple-500/40 rounded-2xl p-6 text-center">
-          <h2 className="text-2xl font-bold text-cyan-300">⚠️ Emergency Helplines</h2>
-          <p className="text-white mt-2">National Disaster Response Force (NDRF): <strong>011-24363260</strong></p>
-          <p className="text-white">State Emergency Operations Centre: <strong>1077</strong></p>
-          <p className="text-purple-200 text-sm mt-3">
-            Use <a href="/register" className="text-cyan-400 underline">CrisisConnect</a> to request food, water, shelter, or rescue.
-          </p>
-        </div>
+        {submitted ? (
+          <div className="bg-green-900/50 border border-green-500 rounded-xl p-6 text-center">
+            <p className="text-green-300 text-lg">✅ Request submitted! You've been added to the waiting list.</p>
+            <p className="text-purple-200 mt-2">Redirecting to home...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-purple-500/30 space-y-4">
+            <div>
+              <label className="block text-purple-300 mb-1">Full Name</label>
+              <input type="text" name="name" required value={formData.name} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+            </div>
+            <div>
+              <label className="block text-purple-300 mb-1">Required Organ Type</label>
+              <select name="requiredOrgan" required value={formData.requiredOrgan} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+                <option value="">Select Organ</option>
+                <option>Kidney</option>
+                <option>Liver</option>
+                <option>Heart</option>
+                <option>Lungs</option>
+                <option>Pancreas</option>
+                <option>Cornea</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-purple-300 mb-1">Blood Group</label>
+              <select name="bloodGroup" required value={formData.bloodGroup} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+                <option value="">Select Blood Group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                <option>O+</option>
+                <option>O-</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-purple-300 mb-1">Age</label>
+                <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+              </div>
+              <div>
+                <label className="block text-purple-300 mb-1">Weight (kg)</label>
+                <input type="number" name="weight" required value={formData.weight} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-purple-300 mb-1">Medical Condition</label>
+              <textarea name="medicalCondition" rows="2" value={formData.medicalCondition} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"></textarea>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-purple-300 mb-1">Urgency</label>
+                <select name="urgency" value={formData.urgency} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-purple-300 mb-1">Waiting Time (days)</label>
+                <input type="text" name="waitingTime" placeholder="e.g., Within 30 days" required value={formData.waitingTime} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+              </div>
+            </div>
+            <button type="submit" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition">
+              Submit Request
+            </button>
+          </form>
+        )}
       </div>
-
-      {/* Footer */}
       <Footer />
     </>
   );
