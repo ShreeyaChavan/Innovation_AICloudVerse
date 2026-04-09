@@ -1,4 +1,4 @@
-// src/App.jsx (updated title)
+// src/App.jsx
 import { useEffect } from "react";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import AboutUs from "./components/AboutUs";
@@ -6,11 +6,21 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Testimonials from "./components/Testimonials";
+import { callLambda } from "./utils/lambdaAPI";  // ✅ Import karo
 
 const App = () => {
   useEffect(() => {
     // Set page title
     document.title = "Anudaan – Donate Life, Save Lives";
+    
+    // ✅ Lambda API call - Page visit track karne ke liye
+    callLambda('anudaan-home').then(data => {
+      if (data) {
+        console.log('✅ Lambda connected! Request ID:', data.requestId);
+      }
+    });
+    
+    // Insertabot script (aapka existing code)
     if (document.querySelector('script[src="https://insertabot.io/widget.js"]')) return;
     const script = document.createElement("script");
     script.src = "https://insertabot.io/widget.js";
