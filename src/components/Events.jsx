@@ -17,7 +17,7 @@ const Events = () => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [smsStatus, setSmsStatus] = useState("");
-  const [matchResult, setMatchResult] = useState(null); // NEW: match info
+  const [matchResult, setMatchResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
@@ -30,19 +30,15 @@ const Events = () => {
 
   // Twilio SMS function
   const sendTwilioSMS = async (mobileNumber, name) => {
-    // Your Twilio credentials
     const TWILIO_ACCOUNT_SID = "ACa5fc90bb02ed7a17f3f69af8a9e58fc2";
     const TWILIO_AUTH_TOKEN = "0fb1797506e5386ce4ef04af883a7707";
     const TWILIO_PHONE_NUMBER = "+16064883603";
     
-    // Format Indian number (add +91)
     const formattedNumber = mobileNumber.startsWith('+') 
       ? mobileNumber 
       : `+91${mobileNumber}`;
     
     const message = `Thank you ${name} for registering as an organ donor with Anudaan. Your decision will save lives!`;
-    
-    // Basic authentication for Twilio API
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
 
     try {
@@ -57,8 +53,6 @@ const Events = () => {
           From: TWILIO_PHONE_NUMBER,
           Body: message
         })
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': `Basic ${auth}` },
-        body: new URLSearchParams({ To: formattedNumber, From: TWILIO_PHONE_NUMBER, Body: message })
       });
       
       const data = await response.json();
@@ -81,7 +75,6 @@ const Events = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic mobile number validation
     if (formData.mobileNumber.length !== 10) {
       alert("Please enter a valid 10-digit mobile number.");
       return;
@@ -90,9 +83,7 @@ const Events = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Save donor to your backend API
-      const response = await fetch(
-      // 1. Save donor to backend API
+      // Save donor to backend API
       const donorResponse = await fetch(
         "https://eli5afar3j.execute-api.ap-south-1.amazonaws.com/dev/donors",
         {
@@ -105,22 +96,17 @@ const Events = () => {
             ...formData,
             timestamp: new Date().toISOString(),
           }),
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ donor_id: Date.now().toString(), ...formData, timestamp: new Date().toISOString() }),
         }
       );
+      
       const donorData = await donorResponse.json();
       console.log("Donor saved:", donorData);
 
-      const data = await response.json();
-      console.log("API Response:", data);
-
-      // 2. Send SMS confirmation (only if API call succeeded)
-      if (response.ok) {
+      // Send SMS confirmation
       if (donorResponse.ok) {
         await sendTwilioSMS(formData.mobileNumber, formData.name);
 
-        // 2. Call matching Lambda
+        // Call matching Lambda
         const matchResponse = await fetch(
           "https://1ypciholac.execute-api.ap-south-1.amazonaws.com/matchDonorToRecipient",
           {
@@ -138,20 +124,20 @@ const Events = () => {
           }
         );
 
-       const matchData = await matchResponse.json();
-if (matchResponse.ok && matchData.recipient) {
-  setMatchResult({ 
-    matched: true, 
-    recipientName: matchData.recipient.name, 
-    recipientBlood: matchData.recipient.blood, 
-    organ: matchData.recipient.organ 
-  });
-} else {
-  setMatchResult({ matched: false });
-}
+        const matchData = await matchResponse.json();
+        if (matchResponse.ok && matchData.recipient) {
+          setMatchResult({ 
+            matched: true, 
+            recipientName: matchData.recipient.name, 
+            recipientBlood: matchData.recipient.blood, 
+            organ: matchData.recipient.organ 
+          });
+        } else {
+          setMatchResult({ matched: false });
+        }
+      }
 
       setSubmitted(true);
-      setTimeout(() => navigate("/home"), 3000);
       setTimeout(() => navigate("/home"), 5000);
 
     } catch (error) {
@@ -167,7 +153,6 @@ if (matchResponse.ok && matchData.recipient) {
       <div className="fixed inset-0 -z-10">
         <BackgroundLayout />
       </div>
-      <div className="fixed inset-0 -z-10"><BackgroundLayout /></div>
       <Header />
       <div className="relative z-10 pt-32 pb-20 px-4 max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
@@ -182,14 +167,11 @@ if (matchResponse.ok && matchData.recipient) {
             <p className="text-green-300 text-lg">✅ Thank you for registering as a donor!</p>
             {smsStatus && <p className="text-purple-200 mt-2 text-sm">{smsStatus}</p>}
             {matchResult && matchResult.matched && (
-              <p className="text-cyan-300 mt-2 text-lg">🎉 You have a match with <b>{matchResult.recipientName}</b>!</p>
+              <p className="text-cyan-300 mt-2 text-lg">
+                🎉 You have a match with <b>{matchResult.recipientName}</b> 
+                ({matchResult.organ}, {matchResult.recipientBlood})!
+              </p>
             )}
-           {matchResult && matchResult.matched && (
-  <p className="text-cyan-300 mt-2 text-lg">
-    🎉 You have a match with <b>{matchResult.recipientName}</b> 
-    ({matchResult.organ}, {matchResult.recipientBlood})!
-  </p>
-)}
             <p className="text-purple-200 mt-2">Redirecting to home...</p>
           </div>
         ) : (
@@ -290,8 +272,6 @@ if (matchResponse.ok && matchData.recipient) {
                 className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"
               ></textarea>
             </div>
-            {/* ... form inputs remain the same ... */}
-            {/* Full Name, Mobile, Organ Type, Blood Group, Age, Weight, Medical Condition */}
             <button 
               type="submit" 
               disabled={isSubmitting}
