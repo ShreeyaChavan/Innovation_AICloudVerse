@@ -1,5 +1,5 @@
 // src/utils/lambdaAPI.js
-const LAMBDA_URL = 'https://8tddyzwpyd.execute-api.ap-south-1.amazonaws.com/prod';
+const LAMBDA_URL = 'https://4bchgpzp5gnf2zyvy4ruim64uu0rhyae.lambda-url.ap-south-1.on.aws/ ';
 
 // Simple function to call Lambda
 export const callLambda = async (page, data = null) => {
