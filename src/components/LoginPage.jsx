@@ -239,9 +239,9 @@ const LoginPage = () => {
               <ShieldCheck className="w-10 h-10 text-purple-400" />
             </motion.div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              CrisisConnect
+             Anudaan
             </h1>
-            <p className="text-purple-300 text-sm mt-2">Disaster relief coordination platform</p>
+            <p className="text-purple-300 text-sm mt-2">Organ Donation Platform</p>
           </div>
 
           <div className="flex gap-3 mb-8 bg-black/30 p-1 rounded-xl">
@@ -372,7 +372,7 @@ const LoginPage = () => {
             ) : (
               <p>Use your AWS Cognito credentials • Secure access for coordinators</p>
             )}
-            <p className="text-purple-400/50">© 2025 CrisisConnect • Disaster Response Platform</p>
+            
           </div>
         </motion.div>
       </div>
