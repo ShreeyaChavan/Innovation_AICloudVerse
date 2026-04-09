@@ -1,6 +1,5 @@
-// src/components/Hero.jsx
+// src/components/Hero.jsx (updated with Anudaan)
 import { motion } from "framer-motion";
-import Button from "./Button";
 
 const Hero = () => {
   return (
@@ -11,11 +10,11 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-red-400 via-blue-400 to-white bg-clip-text text-transparent">
-            Donate Life. <br />
-            Save Lives.
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-red-400 via-blue-400 to-white bg-clip-text text-transparent">
+            Anudaan
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-300 mb-6">Donate Life. Save Lives.</p>
+          <p className="text-md text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
             One organ donor can save up to 8 lives. Join India's most trusted organ donation matching platform.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
@@ -61,7 +60,7 @@ const Hero = () => {
           transition={{ delay: 0.6 }}
           className="mt-12 text-gray-500 text-xs uppercase tracking-wider"
         >
-          Join the movement • Give the gift of life
+          Anudaan • Giving the gift of life
         </motion.div>
       </div>
     </section>
