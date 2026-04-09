@@ -101,7 +101,7 @@ const Blog = () => {
       console.log("Sending:", payload);
 
       // 1. Submit recipient request to your API
-      const res = await fetch("https://fagw10bmre.execute-api.ap-south-1.amazonaws.com/addRecipient", {
+      const res = await fetch("https://e7n0jrqlnk.execute-api.ap-south-1.amazonaws.com/addRecipient", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
