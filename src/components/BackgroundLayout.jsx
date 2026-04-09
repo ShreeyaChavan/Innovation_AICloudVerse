@@ -1,3 +1,4 @@
+// src/components/BackgroundLayout.jsx
 import { useEffect, useRef } from "react";
 
 const BackgroundLayout = ({ children }) => {
@@ -12,16 +13,19 @@ const BackgroundLayout = ({ children }) => {
     canvas.height = window.innerHeight;
 
     const particles = [];
-    const particleCount = 80;
-    const connectionDistance = 150;
+    const particleCount = 60;
+    const connectionDistance = 180;
 
     class Particle {
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.radius = Math.random() * 2 + 1;
+        this.vx = (Math.random() - 0.5) * 0.3;
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.radius = Math.random() * 2 + 1.5;
+        // Medical theme colors: soft red, blue, white
+        const colors = ["rgba(239, 68, 68, 0.4)", "rgba(59, 130, 246, 0.4)", "rgba(255, 255, 255, 0.3)"];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
       }
 
       update() {
@@ -34,7 +38,7 @@ const BackgroundLayout = ({ children }) => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(147, 51, 234, 0.6)";
+        ctx.fillStyle = this.color;
         ctx.fill();
       }
     }
@@ -57,8 +61,9 @@ const BackgroundLayout = ({ children }) => {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(168, 85, 247, ${(1 - distance / connectionDistance) * 0.3})`;
-            ctx.lineWidth = 1;
+            const opacity = (1 - distance / connectionDistance) * 0.15;
+            ctx.strokeStyle = `rgba(239, 68, 68, ${opacity})`;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
@@ -78,30 +83,26 @@ const BackgroundLayout = ({ children }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-return (
-  <div className="relative w-full bg-black text-white overflow-hidden">
-    {/* Global Background Canvas */}
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
-    />
-
-    {/* Purple blur glows */}
-    <div className="pointer-events-none fixed inset-0" style={{ zIndex: 1 }}>
-      <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl animate-pulse" />
-      <div
-        className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl animate-pulse"
-        style={{ animationDelay: "1s" }}
+  return (
+    <div className="relative w-full bg-black text-white overflow-hidden">
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 pointer-events-none"
+        style={{ zIndex: 0 }}
       />
-    </div>
 
-    {/* Main content should be above background */}
-    <div className="relative z-10">
-      {children}
+      {/* Medical-themed soft glows */}
+      <div className="pointer-events-none fixed inset-0" style={{ zIndex: 1 }}>
+        <div className="absolute left-1/4 top-1/3 h-80 w-80 rounded-full bg-red-500/10 blur-3xl animate-pulse" />
+        <div className="absolute right-1/3 bottom-1/4 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+      </div>
+
+      <div className="relative z-10">
+        {children}
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default BackgroundLayout;
