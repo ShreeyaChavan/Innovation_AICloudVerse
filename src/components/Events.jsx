@@ -1,14 +1,17 @@
-// src/components/Events.jsx - Donor Registration Form
+// src/components/Events.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import BackgroundLayout from "./BackgroundLayout";
+// If using DynamoDB, import aws-config; otherwise ignore
+// import { dynamodb } from "../aws-config";
 
 const Events = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
+    mobileNumber: "",        // NEW FIELD
     organType: "",
     bloodGroup: "",
     age: "",
@@ -18,23 +21,48 @@ const Events = () => {
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    // For mobile number, allow only digits and limit to 10
+    if (e.target.name === "mobileNumber") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const donors = JSON.parse(localStorage.getItem("organDonors") || "[]");
+    // Basic mobile number validation
+    if (formData.mobileNumber.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     const newDonor = {
-      id: Date.now(),
+      donorId: Date.now().toString(),
       ...formData,
       timestamp: new Date().toISOString(),
     };
+    // Save to localStorage
+    const donors = JSON.parse(localStorage.getItem("organDonors") || "[]");
     donors.push(newDonor);
     localStorage.setItem("organDonors", JSON.stringify(donors));
+
+    // If using DynamoDB, uncomment the following:
+    /*
+    const params = {
+      TableName: 'Anudaan-Donors',
+      Item: newDonor,
+    };
+    try {
+      await dynamodb.put(params).promise();
+    } catch (error) {
+      console.error("Error saving to DynamoDB:", error);
+      alert("Error saving data. Please try again.");
+      return;
+    }
+    */
+
     setSubmitted(true);
-    setTimeout(() => {
-      navigate("/home");
-    }, 2000);
+    setTimeout(() => navigate("/home"), 2000);
   };
 
   return (
@@ -63,6 +91,10 @@ const Events = () => {
               <input type="text" name="name" required value={formData.name} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" />
             </div>
             <div>
+              <label className="block text-purple-300 mb-1">Mobile Number</label>
+              <input type="tel" name="mobileNumber" required value={formData.mobileNumber} onChange={handleChange} placeholder="10-digit mobile number" className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" />
+            </div>
+            <div>
               <label className="block text-purple-300 mb-1">Organ Type</label>
               <select name="organType" required value={formData.organType} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
                 <option value="">Select Organ</option>
@@ -78,14 +110,8 @@ const Events = () => {
               <label className="block text-purple-300 mb-1">Blood Group</label>
               <select name="bloodGroup" required value={formData.bloodGroup} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
                 <option value="">Select Blood Group</option>
-                <option>A+</option>
-                <option>A-</option>
-                <option>B+</option>
-                <option>B-</option>
-                <option>AB+</option>
-                <option>AB-</option>
-                <option>O+</option>
-                <option>O-</option>
+                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">
