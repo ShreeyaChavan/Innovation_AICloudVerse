@@ -1,4 +1,3 @@
-// src/components/Events.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
@@ -18,8 +17,8 @@ const Events = () => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [smsStatus, setSmsStatus] = useState("");
+  const [matchResult, setMatchResult] = useState(null); // NEW: match info
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [matchResult, setMatchResult] = useState(null); // Added for match info
 
   const handleChange = (e) => {
     let value = e.target.value;
@@ -31,16 +30,19 @@ const Events = () => {
 
   // Twilio SMS function
   const sendTwilioSMS = async (mobileNumber, name) => {
+    // Your Twilio credentials
     const TWILIO_ACCOUNT_SID = "ACa5fc90bb02ed7a17f3f69af8a9e58fc2";
     const TWILIO_AUTH_TOKEN = "0fb1797506e5386ce4ef04af883a7707";
     const TWILIO_PHONE_NUMBER = "+16064883603";
-
+    
+    // Format Indian number (add +91)
     const formattedNumber = mobileNumber.startsWith('+') 
       ? mobileNumber 
       : `+91${mobileNumber}`;
-
+    
     const message = `Thank you ${name} for registering as an organ donor with Anudaan. Your decision will save lives!`;
-
+    
+    // Basic authentication for Twilio API
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
 
     try {
@@ -55,8 +57,10 @@ const Events = () => {
           From: TWILIO_PHONE_NUMBER,
           Body: message
         })
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': `Basic ${auth}` },
+        body: new URLSearchParams({ To: formattedNumber, From: TWILIO_PHONE_NUMBER, Body: message })
       });
-
+      
       const data = await response.json();
       if (response.ok) {
         console.log("✅ SMS sent successfully!", data);
@@ -77,6 +81,7 @@ const Events = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic mobile number validation
     if (formData.mobileNumber.length !== 10) {
       alert("Please enter a valid 10-digit mobile number.");
       return;
@@ -87,61 +92,62 @@ const Events = () => {
     try {
       // 1. Save donor to your backend API
       const response = await fetch(
+      // 1. Save donor to backend API
+      const donorResponse = await fetch(
         "https://eli5afar3j.execute-api.ap-south-1.amazonaws.com/dev/donors",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             donor_id: Date.now().toString(),
             ...formData,
             timestamp: new Date().toISOString(),
           }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ donor_id: Date.now().toString(), ...formData, timestamp: new Date().toISOString() }),
         }
       );
+      const donorData = await donorResponse.json();
+      console.log("Donor saved:", donorData);
 
       const data = await response.json();
       console.log("API Response:", data);
 
       // 2. Send SMS confirmation (only if API call succeeded)
       if (response.ok) {
+      if (donorResponse.ok) {
         await sendTwilioSMS(formData.mobileNumber, formData.name);
 
-        // 3. Call matchDonorToRecipient Lambda
-        try {
-          const matchResponse = await fetch(
-            "https://1ypciholac.execute-api.ap-south-1.amazonaws.com/matchDonorToRecipient",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                donor_id: Date.now().toString(),
-                donorName: formData.name,
-                organType: formData.organType,
-                bloodGroup: formData.bloodGroup,
-                age: formData.age,
-                weight: formData.weight,
-                medicalCondition: formData.medicalCondition,
-                mobileNumber: formData.mobileNumber,
-                timestamp: new Date().toISOString(),
-              }),
-            }
-          );
-
-          const matchData = await matchResponse.json();
-          console.log("Match API Response:", matchData);
-
-          if (matchResponse.ok && matchData.matchedRecipient) {
-            setMatchResult(matchData.matchedRecipient);
-          } else {
-            setMatchResult("no-match");
+        // 2. Call matching Lambda
+        const matchResponse = await fetch(
+          "https://1ypciholac.execute-api.ap-south-1.amazonaws.com/matchDonorToRecipient",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              donorId: donorData.donor_id, 
+              donorName: formData.name, 
+              organType: formData.organType, 
+              bloodGroup: formData.bloodGroup, 
+              age: formData.age, 
+              weight: formData.weight, 
+              medicalCondition: formData.medicalCondition 
+            }),
           }
-        } catch (err) {
-          console.error("Error calling match API:", err);
-          setMatchResult("no-match");
+        );
+
+        const matchData = await matchResponse.json();
+        if (matchResponse.ok && matchData.recipientName) {
+          setMatchResult({ matched: true, recipientName: matchData.recipientName });
+        } else {
+          setMatchResult({ matched: false });
         }
       }
 
       setSubmitted(true);
+      setTimeout(() => navigate("/home"), 3000);
       setTimeout(() => navigate("/home"), 5000);
 
     } catch (error) {
@@ -157,6 +163,7 @@ const Events = () => {
       <div className="fixed inset-0 -z-10">
         <BackgroundLayout />
       </div>
+      <div className="fixed inset-0 -z-10"><BackgroundLayout /></div>
       <Header />
       <div className="relative z-10 pt-32 pb-20 px-4 max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
@@ -167,26 +174,17 @@ const Events = () => {
         </p>
 
         {submitted ? (
-          <>
-            <div className="bg-green-900/50 border border-green-500 rounded-xl p-6 text-center">
-              <p className="text-green-300 text-lg">✅ Thank you for registering as a donor!</p>
-              {smsStatus && <p className="text-purple-200 mt-2 text-sm">{smsStatus}</p>}
-              <p className="text-purple-200 mt-2">Redirecting to home...</p>
-            </div>
-
-            {/* Match info block */}
-            {matchResult && (
-              <div className="mt-4 bg-blue-900/50 border border-blue-500 rounded-xl p-4 text-center">
-                {matchResult === "no-match" ? (
-                  <p className="text-blue-200">⚠️ No matching recipient found at the moment.</p>
-                ) : (
-                  <p className="text-blue-200">
-                    ✅ Match found! Recipient: <span className="font-bold">{matchResult.name}</span>
-                  </p>
-                )}
-              </div>
+          <div className="bg-green-900/50 border border-green-500 rounded-xl p-6 text-center">
+            <p className="text-green-300 text-lg">✅ Thank you for registering as a donor!</p>
+            {smsStatus && <p className="text-purple-200 mt-2 text-sm">{smsStatus}</p>}
+            {matchResult && matchResult.matched && (
+              <p className="text-cyan-300 mt-2 text-lg">🎉 You have a match with <b>{matchResult.recipientName}</b>!</p>
             )}
-          </>
+            {matchResult && !matchResult.matched && (
+              <p className="text-yellow-300 mt-2 text-lg">⚠️ No match found yet. We'll notify you once a recipient is available.</p>
+            )}
+            <p className="text-purple-200 mt-2">Redirecting to home...</p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-purple-500/30 space-y-4">
             <div>
@@ -285,6 +283,8 @@ const Events = () => {
                 className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"
               ></textarea>
             </div>
+            {/* ... form inputs remain the same ... */}
+            {/* Full Name, Mobile, Organ Type, Blood Group, Age, Weight, Medical Condition */}
             <button 
               type="submit" 
               disabled={isSubmitting}
