@@ -117,7 +117,7 @@ const AboutUs = () => {
                 {[
                   { step: "01", title: "Donor Registration", desc: "Register as a donor with medical details" },
                   { step: "02", title: "Recipient Request", desc: "Patients request needed organs" },
-                  { step: "03", title: "AI Matching", desc: "System matches based on compatibility" },
+                  { step: "03", title: "Organ Matching", desc: "System matches based on compatibility" },
                   { step: "04", title: "Life Saved", desc: "Coordinator facilitates transplant" }
                 ].map((item, idx) => (
                   <div key={idx} className="text-center">
@@ -137,7 +137,7 @@ const AboutUs = () => {
             className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
           >
             {[
-              { value: "1,20,000+", label: "Patients Waiting" },
+              { value: "20,000+", label: "Patients Waiting" },
               { value: "8", label: "Lives Per Donor" },
               { value: "500+", label: "Transplants" },
               { value: "99%", label: "Match Accuracy" }
