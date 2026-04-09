@@ -29,41 +29,44 @@ const Events = () => {
     setFormData({ ...formData, [e.target.name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Basic mobile number validation
-    if (formData.mobileNumber.length !== 10) {
-      alert("Please enter a valid 10-digit mobile number.");
-      return;
-    }
-    const newDonor = {
-      donorId: Date.now().toString(),
-      ...formData,
-      timestamp: new Date().toISOString(),
-    };
-    // Save to localStorage
-    const donors = JSON.parse(localStorage.getItem("organDonors") || "[]");
-    donors.push(newDonor);
-    localStorage.setItem("organDonors", JSON.stringify(donors));
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // If using DynamoDB, uncomment the following:
-    /*
-    const params = {
-      TableName: 'Anudaan-Donors',
-      Item: newDonor,
-    };
-    try {
-      await dynamodb.put(params).promise();
-    } catch (error) {
-      console.error("Error saving to DynamoDB:", error);
-      alert("Error saving data. Please try again.");
-      return;
-    }
-    */
+  // Basic mobile number validation
+  if (formData.mobileNumber.length !== 10) {
+    alert("Please enter a valid 10-digit mobile number.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://eli5afar3j.execute-api.ap-south-1.amazonaws.com/dev/donors",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          donor_id: Date.now().toString(), // ✅ IMPORTANT FIX
+          ...formData,
+          timestamp: new Date().toISOString(),
+        }),
+      }
+    );
+
+    const data = await response.json();
+    console.log(data);
 
     setSubmitted(true);
     setTimeout(() => navigate("/home"), 2000);
-  };
+
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error submitting form");
+  }
+};
+
+     
 
   return (
     <>
