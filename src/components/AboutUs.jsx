@@ -1,4 +1,4 @@
-// src/components/AboutUs.jsx
+// src/components/AboutUs.jsx (updated with Anudaan)
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Section from "./Section";
@@ -42,7 +42,7 @@ const AboutUs = () => {
               animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6 }}
             >
-              About OrganConnect
+              About Anudaan
             </motion.h2>
             <motion.div
               className="w-20 h-0.5 bg-gradient-to-r from-red-500 to-blue-500 mx-auto rounded-full"
@@ -50,11 +50,10 @@ const AboutUs = () => {
               animate={isInView ? { width: 80 } : { width: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             />
+            <p className="text-gray-400 mt-4 max-w-2xl mx-auto">अनुदान – The gift of life through selfless giving</p>
           </motion.div>
 
-          {/* Smaller, professional cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {/* Card 1 - Mission */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
@@ -76,7 +75,6 @@ const AboutUs = () => {
               </p>
             </motion.div>
 
-            {/* Card 2 - Vision */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
@@ -99,7 +97,6 @@ const AboutUs = () => {
               </p>
             </motion.div>
 
-            {/* Card 3 - How It Works (span both on larger screens? No, keep grid) */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
@@ -114,7 +111,7 @@ const AboutUs = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-white">How It Works</h3>
+                <h3 className="text-xl font-semibold text-white">How Anudaan Works</h3>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {[
@@ -133,7 +130,6 @@ const AboutUs = () => {
             </motion.div>
           </div>
 
-          {/* Stats Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -160,7 +156,6 @@ const AboutUs = () => {
             ))}
           </motion.div>
 
-          {/* CTA Button */}
           <motion.div
             className="text-center mt-10"
             initial={{ opacity: 0, y: 20 }}
