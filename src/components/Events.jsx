@@ -4,14 +4,12 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import BackgroundLayout from "./BackgroundLayout";
-// If using DynamoDB, import aws-config; otherwise ignore
-// import { dynamodb } from "../aws-config";
 
 const Events = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
-    mobileNumber: "",        // NEW FIELD
+    mobileNumber: "",
     organType: "",
     bloodGroup: "",
     age: "",
@@ -19,54 +17,101 @@ const Events = () => {
     medicalCondition: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [smsStatus, setSmsStatus] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   const handleChange = (e) => {
     let value = e.target.value;
-    // For mobile number, allow only digits and limit to 10
     if (e.target.name === "mobileNumber") {
       value = value.replace(/\D/g, "").slice(0, 10);
     }
     setFormData({ ...formData, [e.target.name]: value });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  // Basic mobile number validation
-  if (formData.mobileNumber.length !== 10) {
-    alert("Please enter a valid 10-digit mobile number.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      "https://eli5afar3j.execute-api.ap-south-1.amazonaws.com/dev/donors",
-      {
-        method: "POST",
+  // Direct Twilio SMS function
+  const sendDirectSMS = async (mobileNumber, name) => {
+    // Your Twilio credentials
+    const TWILIO_ACCOUNT_SID = "ACa5fc90bb02ed7a17f3f69af8a9e58fc2";
+    const TWILIO_AUTH_TOKEN = "0fb1797506e5386ce4ef04af883a7707";
+    const TWILIO_PHONE_NUMBER = "+16064883603";
+    
+    // Format Indian number (add +91)
+    const formattedNumber = mobileNumber.startsWith('+') 
+      ? mobileNumber 
+      : `+91${mobileNumber}`;
+    
+    const message = `Thank you ${name} for registering as an organ donor with Anudaan. Your decision will save lives!`;
+    
+    // Twilio requires basic authentication
+    const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+    
+    try {
+      const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${auth}`
         },
-        body: JSON.stringify({
-          donor_id: Date.now().toString(), // ✅ IMPORTANT FIX
-          ...formData,
-          timestamp: new Date().toISOString(),
-        }),
+        body: new URLSearchParams({
+          To: formattedNumber,
+          From: TWILIO_PHONE_NUMBER,
+          Body: message
+        })
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        console.log("✅ SMS sent!", data);
+        setSmsStatus("✅ Confirmation SMS sent to your mobile number!");
+        return true;
+      } else {
+        console.error("SMS failed:", data);
+        setSmsStatus("⚠️ SMS could not be sent, but your registration was saved.");
+        return false;
       }
-    );
+    } catch (error) {
+      console.error("Network error:", error);
+      setSmsStatus("⚠️ Could not send SMS, but your registration was saved.");
+      return false;
+    }
+  };
 
-    const data = await response.json();
-    console.log(data);
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate mobile number
+    if (formData.mobileNumber.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    
+    setIsSending(true);
+    
+    // Create donor object
+    const newDonor = {
+      donorId: Date.now().toString(),
+      name: formData.name,
+      mobileNumber: formData.mobileNumber,
+      organType: formData.organType,
+      bloodGroup: formData.bloodGroup,
+      age: formData.age,
+      weight: formData.weight,
+      medicalCondition: formData.medicalCondition,
+      timestamp: new Date().toISOString(),
+    };
+    
+    // Save to localStorage
+    const donors = JSON.parse(localStorage.getItem("organDonors") || "[]");
+    donors.push(newDonor);
+    localStorage.setItem("organDonors", JSON.stringify(donors));
+    
+    // Send SMS
+    await sendDirectSMS(formData.mobileNumber, formData.name);
+    setIsSending(false);
+    
     setSubmitted(true);
-    setTimeout(() => navigate("/home"), 2000);
-
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error submitting form");
-  }
-};
-
-     
+    setTimeout(() => navigate("/home"), 3000);
+  };
 
   return (
     <>
@@ -85,21 +130,44 @@ const Events = () => {
         {submitted ? (
           <div className="bg-green-900/50 border border-green-500 rounded-xl p-6 text-center">
             <p className="text-green-300 text-lg">✅ Thank you for registering as a donor!</p>
+            {smsStatus && <p className="text-purple-200 mt-2 text-sm">{smsStatus}</p>}
             <p className="text-purple-200 mt-2">Redirecting to home...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-purple-500/30 space-y-4">
             <div>
               <label className="block text-purple-300 mb-1">Full Name</label>
-              <input type="text" name="name" required value={formData.name} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" />
+              <input 
+                type="text" 
+                name="name" 
+                required 
+                value={formData.name} 
+                onChange={handleChange} 
+                className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" 
+              />
             </div>
             <div>
-              <label className="block text-purple-300 mb-1">Mobile Number</label>
-              <input type="tel" name="mobileNumber" required value={formData.mobileNumber} onChange={handleChange} placeholder="10-digit mobile number" className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" />
+              <label className="block text-purple-300 mb-1">Mobile Number (10 digits)</label>
+              <input 
+                type="tel" 
+                name="mobileNumber" 
+                required 
+                value={formData.mobileNumber} 
+                onChange={handleChange} 
+                placeholder="9876543210" 
+                className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" 
+              />
+              <p className="text-gray-500 text-xs mt-1">You will receive a confirmation SMS on this number</p>
             </div>
             <div>
               <label className="block text-purple-300 mb-1">Organ Type</label>
-              <select name="organType" required value={formData.organType} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+              <select 
+                name="organType" 
+                required 
+                value={formData.organType} 
+                onChange={handleChange} 
+                className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"
+              >
                 <option value="">Select Organ</option>
                 <option>Kidney</option>
                 <option>Liver</option>
@@ -111,28 +179,64 @@ const Events = () => {
             </div>
             <div>
               <label className="block text-purple-300 mb-1">Blood Group</label>
-              <select name="bloodGroup" required value={formData.bloodGroup} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+              <select 
+                name="bloodGroup" 
+                required 
+                value={formData.bloodGroup} 
+                onChange={handleChange} 
+                className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"
+              >
                 <option value="">Select Blood Group</option>
-                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                <option>O+</option>
+                <option>O-</option>
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-purple-300 mb-1">Age</label>
-                <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+                <input 
+                  type="number" 
+                  name="age" 
+                  required 
+                  value={formData.age} 
+                  onChange={handleChange} 
+                  className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" 
+                />
               </div>
               <div>
                 <label className="block text-purple-300 mb-1">Weight (kg)</label>
-                <input type="number" name="weight" required value={formData.weight} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+                <input 
+                  type="number" 
+                  name="weight" 
+                  required 
+                  value={formData.weight} 
+                  onChange={handleChange} 
+                  className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" 
+                />
               </div>
             </div>
             <div>
               <label className="block text-purple-300 mb-1">Medical Condition (if any)</label>
-              <textarea name="medicalCondition" rows="2" value={formData.medicalCondition} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"></textarea>
+              <textarea 
+                name="medicalCondition" 
+                rows="2" 
+                value={formData.medicalCondition} 
+                onChange={handleChange} 
+                className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"
+              ></textarea>
             </div>
-            <button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition">
-              Register as Donor
+            <button 
+              type="submit" 
+              disabled={isSending}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition disabled:opacity-50"
+            >
+              {isSending ? "Sending SMS..." : "Register as Donor"}
             </button>
           </form>
         )}
