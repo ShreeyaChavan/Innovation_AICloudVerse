@@ -19,6 +19,56 @@ import Register from "./components/Register";
 import Events from "./components/Events";
 import Blog from "./components/Blog";
 
+import { AwsRum } from "aws-rum-web";
+
+try {
+  const config = {
+    sessionSampleRate: 1,
+    endpoint: "https://dataplane.rum.ap-south-1.amazonaws.com",
+    telemetries: ["performance", "errors", "http"],
+    allowCookies: true,
+    enableXRay: false,
+    signing: true
+  };
+
+  const APPLICATION_ID = "d82ece1b-1ce3-41d4-a578-097149c3e2ac";
+  const APPLICATION_VERSION = "1.0.0";
+  const APPLICATION_REGION = "ap-south-1";
+
+  new AwsRum(APPLICATION_ID, APPLICATION_VERSION, APPLICATION_REGION, config);
+} catch (error) {
+  console.error("AWS RUM error:", error);
+}
+// ===== AWS RUM END =====
+
+// ===== AWS LAMBDA + CLOUDWATCH MONITORING (WORKING) =====
+const LAMBDA_URL = 'https://muuodutklwhota54mnw275nuzm0rkdis.lambda-url.ap-south-1.on.aws/';
+
+const logToAWS = async (page) => {
+  try {
+    const response = await fetch(`${LAMBDA_URL}?page=${encodeURIComponent(page)}`);
+    if (response.ok) {
+      console.log('✅ AWS CloudWatch Logged:', page);
+    }
+  } catch (error) {
+    console.error('❌ Lambda logging error:', error);
+  }
+};
+
+// Log initial page load
+logToAWS(window.location.pathname);
+
+// Track page changes for SPA
+const originalPushState = history.pushState;
+history.pushState = function(...args) {
+  originalPushState.apply(this, args);
+  logToAWS(window.location.pathname);
+};
+
+window.addEventListener('popstate', () => {
+  logToAWS(window.location.pathname);
+});
+
 // Configure Amplify (for coordinator login)
 Amplify.configure(awsConfig);
 
