@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx (updated title)
 import { useEffect } from "react";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import AboutUs from "./components/AboutUs";
@@ -9,6 +9,8 @@ import Testimonials from "./components/Testimonials";
 
 const App = () => {
   useEffect(() => {
+    // Set page title
+    document.title = "Anudaan – Donate Life, Save Lives";
     if (document.querySelector('script[src="https://insertabot.io/widget.js"]')) return;
     const script = document.createElement("script");
     script.src = "https://insertabot.io/widget.js";
