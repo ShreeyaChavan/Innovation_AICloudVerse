@@ -1,25 +1,112 @@
-// src/components/Events.jsx
-import React from "react";
+// src/components/Events.jsx - Donor Registration Form
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import BackgroundLayout from "./BackgroundLayout";
-import EventList from "./EventList";   // ← use the repurposed EventList
 
 const Events = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    organType: "",
+    bloodGroup: "",
+    age: "",
+    weight: "",
+    medicalCondition: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const donors = JSON.parse(localStorage.getItem("organDonors") || "[]");
+    const newDonor = {
+      id: Date.now(),
+      ...formData,
+      timestamp: new Date().toISOString(),
+    };
+    donors.push(newDonor);
+    localStorage.setItem("organDonors", JSON.stringify(donors));
+    setSubmitted(true);
+    setTimeout(() => {
+      navigate("/home");
+    }, 2000);
+  };
+
   return (
     <>
       <div className="fixed inset-0 -z-10">
         <BackgroundLayout />
       </div>
       <Header />
-      <div className="relative z-10 pt-32 pb-20 px-4 max-w-7xl mx-auto">
-        <h1 className="text-4xl md:text-6xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
-          Active Disaster Zones
+      <div className="relative z-10 pt-32 pb-20 px-4 max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
+          Register as an Organ Donor
         </h1>
-        <p className="text-center text-purple-200 text-lg mb-12">
-          Real‑time updates on affected areas and required resources.
+        <p className="text-center text-purple-200 mb-8">
+          Your decision can save multiple lives. Fill the form below to join the donor registry.
         </p>
-        <EventList />   {/* ← now shows crisis zones */}
+
+        {submitted ? (
+          <div className="bg-green-900/50 border border-green-500 rounded-xl p-6 text-center">
+            <p className="text-green-300 text-lg">✅ Thank you for registering as a donor!</p>
+            <p className="text-purple-200 mt-2">Redirecting to home...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-purple-500/30 space-y-4">
+            <div>
+              <label className="block text-purple-300 mb-1">Full Name</label>
+              <input type="text" name="name" required value={formData.name} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:border-purple-400" />
+            </div>
+            <div>
+              <label className="block text-purple-300 mb-1">Organ Type</label>
+              <select name="organType" required value={formData.organType} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+                <option value="">Select Organ</option>
+                <option>Kidney</option>
+                <option>Liver</option>
+                <option>Heart</option>
+                <option>Lungs</option>
+                <option>Pancreas</option>
+                <option>Cornea</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-purple-300 mb-1">Blood Group</label>
+              <select name="bloodGroup" required value={formData.bloodGroup} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white">
+                <option value="">Select Blood Group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                <option>O+</option>
+                <option>O-</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-purple-300 mb-1">Age</label>
+                <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+              </div>
+              <div>
+                <label className="block text-purple-300 mb-1">Weight (kg)</label>
+                <input type="number" name="weight" required value={formData.weight} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-purple-300 mb-1">Medical Condition (if any)</label>
+              <textarea name="medicalCondition" rows="2" value={formData.medicalCondition} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white"></textarea>
+            </div>
+            <button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition">
+              Register as Donor
+            </button>
+          </form>
+        )}
       </div>
       <Footer />
     </>
