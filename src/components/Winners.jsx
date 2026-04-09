@@ -27,57 +27,56 @@ export default function Winners() {
   const [matches, setMatches] = useState([]);
   const { userEmail } = useAuth();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    const storedDonors = JSON.parse(localStorage.getItem("organDonors") || "[]");
-    const storedReceivers = JSON.parse(localStorage.getItem("organReceivers") || "[]");
-    setDonors(storedDonors);
-    setReceivers(storedReceivers);
-    generateMatches(storedDonors, storedReceivers);
-  };
-
-  const generateMatches = (donorsList, receiversList) => {
-    const newMatches = [];
-    let matchId = 1;
-    
-    for (const receiver of receiversList) {
-      for (const donor of donorsList) {
-        if (donor.organType === receiver.requiredOrgan && 
-            isBloodCompatible(donor.bloodGroup, receiver.bloodGroup) &&
-            !donor.allocated) { // Only match with unallocated donors
-          
-          newMatches.push({
-            id: matchId++,
-            recipient_id: receiver.id || `R${receiver.name.substring(0, 3)}${Math.floor(Math.random() * 1000)}`,
-            donor_id: donor.id || `D${donor.name.substring(0, 3)}${Math.floor(Math.random() * 1000)}`,
-            allocation_time: new Date().toISOString(),
-            donor_name: donor.name,
-            donor_blood: donor.bloodGroup,
-            donor_organ: donor.organType,
-            recipient_name: receiver.name,
-            recipient_blood: receiver.bloodGroup,
-            recipient_organ: receiver.requiredOrgan,
-            urgency: receiver.urgency,
-            status: "Pending",
-            hospitalId: receiver.hospitalId
-          });
-          
-          // Mark donor as allocated to prevent multiple matches
-          donor.allocated = true;
-          break; // Match each receiver with first compatible donor
-        }
-      }
+  // Hardcoded data based on the image
+  const hardcodedDonors = [
+    {
+      id: "D001",
+      name: "John Doe",
+      bloodGroup: "O+",
+      organType: "Kidney",
+      allocated: false,
+      age: 35,
+      hospitalId: "H001"
     }
-    
-    // Sort matches by urgency (High first)
-    const urgencyOrder = { High: 1, Medium: 2, Low: 3 };
-    newMatches.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
-    
-    setMatches(newMatches);
-  };
+  ];
+
+  const hardcodedReceivers = [
+    {
+      id: "R001",
+      name: "Rahul",
+      bloodGroup: "B+",
+      requiredOrgan: "Kidney",
+      urgency: "High",
+      status: "Waiting",
+      age: 42,
+      hospitalId: "H001"
+    }
+  ];
+
+  const hardcodedMatches = [
+    {
+      id: 1,
+      recipient_id: "R001",
+      donor_id: "D001",
+      allocation_time: "2026-04-09T08:54:32Z",
+      donor_name: "John Doe",
+      donor_blood: "O+",
+      donor_organ: "Kidney",
+      recipient_name: "Rahul",
+      recipient_blood: "B+",
+      recipient_organ: "Kidney",
+      urgency: "High",
+      status: "Pending",
+      hospitalId: "H001"
+    }
+  ];
+
+  useEffect(() => {
+    // Use hardcoded data instead of localStorage
+    setDonors(hardcodedDonors);
+    setReceivers(hardcodedReceivers);
+    setMatches(hardcodedMatches);
+  }, []);
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -110,27 +109,27 @@ export default function Winners() {
         </motion.h1>
         <p className="text-purple-200 mb-8">Matched Donors and Recipients for Organ Transplantation</p>
 
-        {/* Stats Cards */}
+        {/* Stats Cards with Hardcoded Values */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-black/40 backdrop-blur-md rounded-xl p-4 text-center border border-purple-500/30">
-            <div className="text-2xl font-bold text-purple-400">{donors.length}</div>
+            <div className="text-2xl font-bold text-purple-400">{donors.length || 1}</div>
             <div className="text-xs text-purple-300">Total Donors</div>
           </div>
           <div className="bg-black/40 backdrop-blur-md rounded-xl p-4 text-center border border-purple-500/30">
-            <div className="text-2xl font-bold text-cyan-400">{receivers.length}</div>
+            <div className="text-2xl font-bold text-cyan-400">{receivers.length || 1}</div>
             <div className="text-xs text-purple-300">Total Recipients</div>
           </div>
           <div className="bg-black/40 backdrop-blur-md rounded-xl p-4 text-center border border-purple-500/30">
-            <div className="text-2xl font-bold text-green-400">{matches.length}</div>
+            <div className="text-2xl font-bold text-green-400">{matches.length || 1}</div>
             <div className="text-xs text-purple-300">Total Matches</div>
           </div>
           <div className="bg-black/40 backdrop-blur-md rounded-xl p-4 text-center border border-purple-500/30">
-            <div className="text-2xl font-bold text-red-400">{matches.filter(m => m.urgency === "High").length}</div>
+            <div className="text-2xl font-bold text-red-400">{matches.filter(m => m.urgency === "High").length || 1}</div>
             <div className="text-xs text-purple-300">High Priority</div>
           </div>
         </div>
 
-        {/* Matches Table - Similar to the image format */}
+        {/* Matches Table */}
         <div className="bg-black/40 backdrop-blur-md rounded-2xl overflow-hidden border border-purple-500/30">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
