@@ -29,41 +29,34 @@ const Blog = () => {
     setFormData({ ...formData, [e.target.name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.mobileNumber.length !== 10) {
-      alert("Please enter a valid 10-digit mobile number.");
-      return;
-    }
-    const newReceiver = {
-      receiverId: Date.now().toString(),
-      ...formData,
-      timestamp: new Date().toISOString(),
-      status: "waiting",
-    };
-    // Save to localStorage
-    const receivers = JSON.parse(localStorage.getItem("organReceivers") || "[]");
-    receivers.push(newReceiver);
-    localStorage.setItem("organReceivers", JSON.stringify(receivers));
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // If using DynamoDB, uncomment the following:
-    /*
-    const params = {
-      TableName: 'Anudaan-Receivers',
-      Item: newReceiver,
-    };
-    try {
-      await dynamodb.put(params).promise();
-    } catch (error) {
-      console.error("Error saving to DynamoDB:", error);
-      alert("Error saving data. Please try again.");
-      return;
-    }
-    */
+  if (formData.mobileNumber.length !== 10) {
+    alert("Please enter a valid 10-digit mobile number.");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://fagw10bmre.execute-api.ap-south-1.amazonaws.com/addRecipient", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await res.json();
+    console.log(data);
 
     setSubmitted(true);
     setTimeout(() => navigate("/home"), 2000);
-  };
+
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Failed to submit request");
+  }
+};
 
   return (
     <>
