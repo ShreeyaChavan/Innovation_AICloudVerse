@@ -1,64 +1,67 @@
-// Hero.jsx
+// src/components/Hero.jsx
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import Button from "./Button";
 
 const Hero = () => {
-  const navigate = useNavigate();
-
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated background instead of video */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-black to-cyan-900/40 z-0" />
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1582213782179-e0d53f98f2a9?w=1600')] bg-cover bg-center opacity-20 z-0" />
-      
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <motion.h1 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-5xl md:text-7xl font-black bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent"
-        >
-          CrisisConnect
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-xl md:text-2xl text-purple-200 mt-4"
-        >
-          Real-time disaster aid coordination. <br />Resilient. Scalable. Built for the storm.
-        </motion.p>
-        
-        <motion.div 
+    <section className="relative pt-32 pb-20 overflow-hidden">
+      <div className="container mx-auto px-4 text-center">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="flex gap-4 justify-center mt-8 flex-wrap"
+          transition={{ duration: 0.8 }}
         >
-          <button onClick={() => navigate('/register')} className="bg-gradient-to-r from-purple-600 to-cyan-600 px-8 py-3 rounded-full font-bold text-lg shadow-lg hover:scale-105 transition">
-            Request Help
-          </button>
-         
+          <h1 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+            Donate Life. <br />
+            Save Lives.
+          </h1>
+          <p className="text-xl text-purple-200 max-w-2xl mx-auto mb-8">
+            One organ donor can save up to 8 lives. Join the mission to bridge
+            the gap between donors and recipients.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a href="/events">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
+                Become a Donor
+              </Button>
+            </a>
+            <a href="/blogs">
+              <Button className="bg-gradient-to-r from-cyan-600 to-blue-600">
+                Request Organ
+              </Button>
+            </a>
+          </div>
         </motion.div>
 
-        {/* Live stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 text-center">
-          <div className="bg-black/40 backdrop-blur rounded-xl p-4">
-            <div className="text-3xl font-bold text-cyan-400">124</div>
-            <div className="text-sm">Active Requests</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur rounded-xl p-4">
-            <div className="text-3xl font-bold text-purple-400">18</div>
-            <div className="text-sm">Coordinators Online</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur rounded-xl p-4">
-            <div className="text-3xl font-bold text-green-400">342</div>
-            <div className="text-sm">Lives Helped</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur rounded-xl p-4">
-            <div className="text-3xl font-bold text-yellow-400">$0.42</div>
-            <div className="text-sm">Est. Cost Today</div>
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
+        >
+          {[
+            { number: "1,20,000+", label: "Patients Waiting" },
+            { number: "8", label: "Lives Saved Per Donor" },
+            { number: "500+", label: "Transplants Facilitated" },
+          ].map((stat, idx) => (
+            <div
+              key={idx}
+              className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-purple-500/30"
+            >
+              <div className="text-3xl font-bold text-cyan-400">{stat.number}</div>
+              <div className="text-purple-200 text-sm">{stat.label}</div>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mt-16 text-purple-300 text-sm"
+        >
+           Register as a donor today and give the gift of life
+        </motion.div>
       </div>
     </section>
   );
