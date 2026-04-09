@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Analytics } from "@vercel/analytics/react";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import AboutUs from "./components/AboutUs";
 import Footer from "./components/Footer";
@@ -32,7 +31,7 @@ const App = () => {
         <Footer />
       </div>
 
-      <Analytics />
+  
       <ButtonGradient />
     </>
   );
