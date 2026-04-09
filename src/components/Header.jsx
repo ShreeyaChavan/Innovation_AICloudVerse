@@ -1,4 +1,4 @@
-// src/components/Header.jsx
+// src/components/Header.jsx (updated with Anudaan logo/name)
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
@@ -49,7 +49,6 @@ const Header = () => {
 
   const navItems = [...navigation];
   if (!isCoordinator) {
-    // Remove Winners (Dashboard) from nav if not coordinator
     const filtered = navItems.filter(item => item.title !== "Dashboard");
     navItems.length = 0;
     navItems.push(...filtered);
@@ -58,6 +57,11 @@ const Header = () => {
   return (
     <div className={`fixed top-0 left-0 w-full z-50 bg-transparent ${openNavigation ? "bg-n-8" : "bg-transparent"}`}>
       <div className="flex px-5 lg:px-7.5 xl:px-10 max-lg:py-4 items-center justify-between w-full">
+        {/* Anudaan Logo / Name */}
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold bg-gradient-to-r from-red-400 to-blue-400 bg-clip-text text-transparent">Anudaan</span>
+        </div>
+
         <nav className={`${openNavigation ? "flex" : "hidden"} fixed top-[5rem] left-0 right-0 bottom-0 bg-n-8 lg:static lg:flex lg:flex-1 lg:justify-center lg:bg-transparent`}>
           <div className="relative z-2 flex flex-col items-center justify-center gap-8 lg:flex-row">
             {navItems.map((item) => (
