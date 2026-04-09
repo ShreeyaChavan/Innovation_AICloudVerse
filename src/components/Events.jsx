@@ -138,13 +138,17 @@ const Events = () => {
           }
         );
 
-        const matchData = await matchResponse.json();
-        if (matchResponse.ok && matchData.recipientName) {
-          setMatchResult({ matched: true, recipientName: matchData.recipientName });
-        } else {
-          setMatchResult({ matched: false });
-        }
-      }
+       const matchData = await matchResponse.json();
+if (matchResponse.ok && matchData.recipient) {
+  setMatchResult({ 
+    matched: true, 
+    recipientName: matchData.recipient.name, 
+    recipientBlood: matchData.recipient.blood, 
+    organ: matchData.recipient.organ 
+  });
+} else {
+  setMatchResult({ matched: false });
+}
 
       setSubmitted(true);
       setTimeout(() => navigate("/home"), 3000);
@@ -180,9 +184,12 @@ const Events = () => {
             {matchResult && matchResult.matched && (
               <p className="text-cyan-300 mt-2 text-lg">🎉 You have a match with <b>{matchResult.recipientName}</b>!</p>
             )}
-            {matchResult && !matchResult.matched && (
-              <p className="text-yellow-300 mt-2 text-lg">⚠️ No match found yet. We'll notify you once a recipient is available.</p>
-            )}
+           {matchResult && matchResult.matched && (
+  <p className="text-cyan-300 mt-2 text-lg">
+    🎉 You have a match with <b>{matchResult.recipientName}</b> 
+    ({matchResult.organ}, {matchResult.recipientBlood})!
+  </p>
+)}
             <p className="text-purple-200 mt-2">Redirecting to home...</p>
           </div>
         ) : (
