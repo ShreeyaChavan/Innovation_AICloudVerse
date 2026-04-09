@@ -1,3 +1,4 @@
+// src/constants/index.js
 import {
   benefitIcon1,
   benefitIcon2,
@@ -33,7 +34,6 @@ import {
   twitter
 } from "../assets";
 
-// Navigation with corrected URLs
 export const navigation = [
   {
     id: "0",
@@ -42,20 +42,24 @@ export const navigation = [
   },
   {
     id: "1",
-    title: "Events",
+    title: "Donate",
     url: "/events",
   },
   {
     id: "2",
-    title: "Blogs",
+    title: "Receive",
     url: "/blogs",
   },
   {
     id: "3",
-    title: "Team",
+    title: "Waiting List",
     url: "/team",
   },
-  // Winners will be added conditionally in Header.jsx
+  {
+    id: "4",
+    title: "Dashboard",
+    url: "/winners",
+  },
 ];
 
 export const heroIcons = [homeSmile, file02, searchMd, plusSquare];
@@ -232,67 +236,88 @@ export const benefits = [
     title: "",
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
+    
   },
+
   {
     id: "0",
+   
+    backgroundUrl: "./src/assets/benefits/card-1.svg",
+    imageUrl: benefitImage2,
+  },
+
+  {
+    id: "0",
+  
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
   {
     id: "0",
+    
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
   {
     id: "0",
+    
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
   {
     id: "0",
+    
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
-  {
-    id: "0",
-    backgroundUrl: "./src/assets/benefits/card-1.svg",
-    imageUrl: benefitImage2,
-  },
+
   {
     id: "0",
     title: "",
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
+
   {
     id: "0",
+   
+    backgroundUrl: "./src/assets/benefits/card-1.svg",
+    imageUrl: benefitImage2,
+  },
+
+  {
+    id: "0",
+  
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
   {
     id: "0",
+    
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
   {
     id: "0",
+    
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   },
   {
     id: "0",
-    backgroundUrl: "./src/assets/benefits/card-1.svg",
-    imageUrl: benefitImage2,
-  },
-  {
-    id: "0",
+    
     backgroundUrl: "./src/assets/benefits/card-1.svg",
     imageUrl: benefitImage2,
   }
+
+  
+
+
+  
 ];
 
-// SOCIALS EXPORT – THIS WAS MISSING
 export const socials = [
+
   {
     id: "1",
     title: "Linkedin",
@@ -311,4 +336,5 @@ export const socials = [
     iconUrl: telegram,
     url: "https://www.youtube.com/@aicvscummins3964",
   },
+
 ];
