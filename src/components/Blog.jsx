@@ -131,10 +131,7 @@ const Blog = () => {
                   <option>High</option><option>Medium</option><option>Low</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-purple-300 mb-1">Waiting Time (days)</label>
-                <input type="text" name="waitingTime" placeholder="e.g., Within 30 days" required value={formData.waitingTime} onChange={handleChange} className="w-full bg-black/50 border border-purple-500/30 rounded-lg p-3 text-white" />
-              </div>
+             
             </div>
             <button type="submit" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition">
               Submit Request
