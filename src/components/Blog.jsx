@@ -38,16 +38,27 @@ const Blog = () => {
   }
 
   try {
+    const payload = {
+      name: formData.name,
+      mobileNumber: formData.mobileNumber,
+      requiredOrgan: formData.requiredOrgan.toLowerCase(), // ✅ FIX
+      bloodGroup: formData.bloodGroup, // Lambda will handle +/-
+      medicalCondition: formData.medicalCondition,
+      urgency: formData.urgency.toLowerCase() // ✅ FIX
+    };
+
+    console.log("Sending:", payload); // 🔍 DEBUG
+
     const res = await fetch("https://fagw10bmre.execute-api.ap-south-1.amazonaws.com/addRecipient", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
-    console.log(data);
+    console.log("Response:", data);
 
     setSubmitted(true);
     setTimeout(() => navigate("/home"), 2000);
