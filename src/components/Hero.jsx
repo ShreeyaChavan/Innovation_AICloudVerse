@@ -38,7 +38,7 @@ const Hero = () => {
           className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-5 max-w-3xl mx-auto"
         >
           {[
-            { number: "1,20,000+", label: "Patients Waiting for Organs", highlight: true },
+            { number: "20,000+", label: "Patients Waiting for Organs", highlight: true },
             { number: "8", label: "Lives That Can Be Saved by One Donor" },
             { number: "500+", label: "Successful Transplants Facilitated" },
           ].map((stat, idx) => (
